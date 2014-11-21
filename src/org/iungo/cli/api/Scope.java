@@ -13,6 +13,8 @@ public interface Scope {
 	
 	Block getBlock();
 	
+	Boolean isDefinedValue(String key);
+	
 	Result defineValue(String key, Object value);
 	
 	<T> T getValue(String key);

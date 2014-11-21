@@ -193,7 +193,7 @@ Method method() :
 		return method;	}
 }
 
-void block(final Block block) :
+Block block(final Block block) :
 {	Argument argument;
 }
 {	< BEGIN_BLOCK >
@@ -204,6 +204,8 @@ void block(final Block block) :
 		}
 	)*
 	< END_BLOCK >
+	{
+		return new DefaultBlock();	}
 }
 
 Argument argument() :
@@ -212,7 +214,6 @@ Argument argument() :
 	Token token;
 }
 {
-//	< BEGIN_BLOCK >
 	(
 		(
 			argument = breakArgument()
@@ -309,8 +310,6 @@ Argument argument() :
 			}
 		)
 	)
-//	< PERIOD >
-//	< END_BLOCK >
 	{
 		return argument;	}
 }
@@ -493,15 +492,15 @@ Argument ifArgument() :
 	Argument condition;
 }
 {
-	< IF > condition = argument()
+	< IF > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET > 
 	{
 		final IfConditionBlock ifConditionBlock = new IfConditionBlock(condition);	}
 	block(ifConditionBlock)
 	(
 		< ELSE >
-		block(ifConditionBlock.getElse())	)?
+		block(ifConditionBlock.getElseBlock())	)?
 	{
-		return new IfConditionArgument(ifConditionBlock);
+		return ifConditionBlock;
 	}
 }
 
@@ -679,11 +678,11 @@ Argument whileArgument() :
 	Argument condition, argument;
 }
 {
-	< WHILE > condition = argument()
+	< WHILE > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET >
 	{
 		final WhileConditionBlock whileConditionBlock = new WhileConditionBlock(condition);	}
-	block(whileConditionBlock)	
+	block(whileConditionBlock)
 	{
-		return new WhileConditionArgument(whileConditionBlock);
+		return whileConditionBlock;
 	}
 }

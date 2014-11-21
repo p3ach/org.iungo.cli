@@ -1,0 +1,689 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  JDK_VERSION = "1.5";
+  static = false;
+}
+
+PARSER_BEGIN(DefaultGrammar)
+package org.iungo.cli.grammar;
+
+import java.util.*;
+
+import org.iungo.cli.api.*;
+import org.iungo.cli.implementation.*;
+
+/*
+* JavaCC generates some {if (true) return ...;} statements which causes "unused" warnings when the generated class file is compiled...
+*/
+@SuppressWarnings("unused")
+public class DefaultGrammar extends AbstractGrammar
+{
+	/*
+	* Class.
+	*/
+
+	/*
+	* Instance.
+	*/
+
+}
+
+PARSER_END(DefaultGrammar)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN :
+{
+  < ARGUMENTS : "arguments" >
+| < BREAK : "break" >
+| < CALL : "call" >
+| < CLOSE : "close" >
+| < CONFIG : "config" >
+| < CONNECT : "connect" >
+| < CONSOLE : "console" >
+| < CONTEXT : "context" >
+| < CONTINUE : "continue" >
+| < DEFINE : "define" >
+| < DISCONNECT : "disconnect" >
+| < ELSE : "else" >
+| < GET : "get" >
+| < GREP : "grep" >
+| < HTTP : "http" >
+| < ID : "id" >
+| < IF : "if" >
+| < INPUT : "input" >
+| < IUNGO : "iungo" >
+| < KEY : "key" >
+| < LEVEL : "level" >
+| < LOG : "log" >
+| < MAPPER : "mapper" >
+| < METHOD : "method" >
+| < NEW : "new" >
+| < NODE : "node" >
+| < NOT : "not" >
+| < NULL : "null" >
+| < OPEN : "open" >
+| < OPTIONS : "options" >
+| < PARAMETERS : "parameters" >
+| < PING : "ping" >
+| < PROPERTY : "property" >
+| < REGEX : "regex" >
+| < RETURN : "return" >
+| < RUN : "run" >
+| < SHOW : "show" >
+| < SET : "set" >
+| < SYSTEM : "system" >
+| < TEXT : "text" >
+| < UNIT : "unit" >
+| < URL : "url" >
+| < VALUE : "value" >
+| < WHILE : "while" >
+| < BEGIN_BLOCK : "{" >
+| < END_BLOCK : "}" >
+| < LEFT_BRACKET : "(" >
+| < RIGHT_BRACKET : ")" >
+| < COMMA : "," >
+| < PERIOD : "." >
+| < DOUBLE_QUOTED_STRING : "\"" (~["\""])+ "\"" >
+| < FALSE_BOOLEAN : "false" >
+| < TRUE_BOOLEAN : "true" >
+}
+
+/*
+	SKIP.
+*/
+
+< * > SKIP :
+{
+  "/*": IN_COMMENT
+}
+      
+// When any other character is seen in the IN_COMMENT state, skip it.
+< IN_COMMENT > SKIP : { <  ~[] > }
+
+// When a */ is seen in the IN_COMMENT state, skip it and switch back to the DEFAULT state
+< IN_COMMENT > SKIP : { "*/": DEFAULT }
+
+Unit compile() :
+{
+	Unit unit;
+	Method method;
+	Block block;}
+{
+	(		(			unit = unit()
+		)
+		|
+		(
+			{
+				unit = new DefaultUnit(createUnitName());
+			}
+			method = method()
+			{
+				unit.getMethods().add(method);
+			}
+		)
+		|
+		(
+			{
+				unit = new DefaultUnit(createUnitName());
+				method = new DefaultMethod(Method.MAIN_METHOD_NAME);				unit.getMethods().add(method);
+			}
+			block(method.getBlock())
+		)
+	)
+	< EOF >
+	{
+		return unit;	}}
+
+Unit unit() :
+{
+	Token unitName, methodName, parameterName, returnName;
+	Method method;
+}
+{
+	< UNIT > unitName = < DOUBLE_QUOTED_STRING >
+	{		final Unit unit = new DefaultUnit(removeDoubleQuotes(unitName));
+	}
+	< BEGIN_BLOCK >
+	(
+		method = method()
+		{
+			unit.getMethods().add(method);		}
+	)*
+	< END_BLOCK >
+	{
+		return unit;
+	}
+}
+
+Method method() :
+{
+	Token methodName, parameterName;	final List<String> parameters = new LinkedList<String>();
+	final Block block;
+}
+{
+	< METHOD > methodName = < DOUBLE_QUOTED_STRING >
+	{
+		final Method method = new DefaultMethod(removeDoubleQuotes(methodName));	}
+	< PARAMETERS >
+	< LEFT_BRACKET >
+	(
+		parameterName = < DOUBLE_QUOTED_STRING >
+		{
+			method.getParameters().add(removeDoubleQuotes(parameterName));		}
+		(
+			< COMMA > parameterName = < DOUBLE_QUOTED_STRING >
+			{
+				method.getParameters().add(removeDoubleQuotes(parameterName));
+			}
+		)?
+	)*
+	< RIGHT_BRACKET >
+	{
+		block(method.getBlock());
+		return method;	}
+}
+
+void block(final Block block) :
+{	Argument argument;
+}
+{	< BEGIN_BLOCK >
+	(
+		argument = argument()
+		{
+			block.addArgument(argument);
+		}
+	)*
+	< END_BLOCK >
+}
+
+Argument argument() :
+{
+	Argument argument = null;
+	Token token;
+}
+{
+//	< BEGIN_BLOCK >
+	(
+		(
+			argument = breakArgument()
+		)
+		| 
+		(
+			argument = callArgument()
+		)
+		| 
+		(
+			argument = closeArgument()
+		)
+		| 
+		(
+			argument = connectArgument()
+		)
+		| 
+		(
+			argument = continueArgument()
+		)
+		| 
+		(
+			argument = defineArgument()
+		)
+		| 
+		(
+			argument = disconnectArgument()
+		)
+		| 
+		(
+			argument = getArgument()
+		)
+		| 
+		(
+			argument = grepArgument()
+		)
+		| 
+		(
+			argument = ifArgument()
+		)
+		| 
+		(
+			argument = logArgument()
+		)
+		| 
+		(
+			argument = newArgument()
+		)
+		| 
+		(
+			argument = notArgument()
+		)
+		| 
+		(
+			argument = openArgument()
+		)
+		| 
+		(
+			argument = pingArgument()
+		)
+		| 
+		(
+			argument = returnArgument()
+		)
+		| 
+		(
+			argument = runArgument()
+		)
+		| 
+		(
+			argument = setArgument()
+		)
+		| 
+		(
+			argument = showArgument()
+		)
+		| 
+		(
+			argument = whileArgument()
+		)
+		| 
+		(
+			token = < DOUBLE_QUOTED_STRING >
+			{
+				argument = new LiteralArgument(removeDoubleQuotes(token));			}
+		)
+		| 
+		(
+			(				token = < FALSE_BOOLEAN >
+				| token = < TRUE_BOOLEAN >
+			)
+			{
+				argument = new LiteralArgument(Boolean.valueOf(token.image));
+			}
+		)
+	)
+//	< PERIOD >
+//	< END_BLOCK >
+	{
+		return argument;	}
+}
+
+Argument breakArgument() :
+{}
+{
+	< BREAK >
+	{		return new BreakFlowControlArgument();
+	}}
+
+Argument callArgument() :
+{
+	Argument unitName, methodName;
+}
+{
+	< CALL >
+	< UNIT > unitName = argument()
+	< METHOD > methodName = argument()
+	{
+		Arguments arguments = new DefaultArguments();
+	}
+	(		< ARGUMENTS >
+		{
+			Argument argument;		}
+		< LEFT_BRACKET >
+		(
+			argument = argument()
+			{
+				arguments.addArgument(argument);
+			}
+			(
+				< COMMA > argument = argument()
+				{
+				arguments.addArgument(argument);
+				}
+			)?
+		)*
+		< RIGHT_BRACKET >
+	)?
+	{
+		return new CallMethodArgument(unitName, methodName, arguments);	}
+}
+
+Argument closeArgument() :
+{
+	Argument id, iungo, result;
+}
+{
+	< CLOSE >
+	(
+		(
+			< CONFIG > id = argument()
+			{
+				result = new CloseConfigArgument(id);
+			}
+		)
+		|
+		(
+			< CONSOLE >
+			{
+				result = new CloseConsoleArgument();			}		)
+		|
+		(
+			< IUNGO > iungo = argument()
+			{
+				result = new CloseIungoArgument(iungo);			}
+		)	)
+	{
+		return result;
+	}
+}
+
+Argument connectArgument() :
+{
+	Argument iungo, result;
+}
+{
+	< CONNECT >
+	(
+		< IUNGO > iungo = argument()
+		{
+			result = new ConnectIungoArgument(iungo);		}	)
+	{
+		return result;
+	}
+}
+
+Argument continueArgument() :
+{
+}
+{
+	< CONTINUE >
+	{
+		return new ContinueFlowControlArgument();
+	}
+}
+
+Argument defineArgument() :
+{
+	Argument key, value;
+	Argument result;
+}
+{
+	< DEFINE >
+	(
+		< KEY > key = argument()
+		{
+			value = LiteralArgument.NULL;		}
+		(
+			< VALUE > value = argument()		)?
+		{
+			result = new DefineValueArgument(key, value);
+		}
+	)
+	{
+		return result;
+	}
+}
+
+Argument disconnectArgument() :
+{
+	Argument iungo, result;
+}
+{
+	< DISCONNECT >
+	(
+		< IUNGO >
+		{
+			result = new DisconnectIungoArgument();
+		}
+	)
+	{
+		return result;
+	}
+}
+
+Argument getArgument() :
+{
+	Argument context, key, value;
+}
+{
+	< GET >
+//	< PROPERTY >
+//	{//		context = LiteralArgument.NULL;//	}//	(//		< CONTEXT > context = argument()//	)?
+	< KEY > key = argument()
+	{
+		value = LiteralArgument.NULL;	}
+	(		< IF > < NULL > value = argument()
+	)?
+	{
+		return new GetValueArgument(key, value);
+	}
+}
+
+Argument grepArgument() :
+{
+	Arguments options = new Arguments();
+	Argument option, regex, input;
+}
+{
+	< GREP >
+	(		< OPTIONS >
+		< LEFT_BRACKET >
+		(			option = argument()
+			(
+				< COMMA > option = argument()			)*
+		)?
+		< RIGHT_BRACKET >
+	)?
+	< REGEX > regex = argument()
+	< INPUT > input = argument()
+	{
+		return new GREPArgument(options, regex, input);
+	}
+}
+
+Argument ifArgument() :
+{
+	Argument condition;
+}
+{
+	< IF > condition = argument()
+	{
+		final IfConditionBlock ifConditionBlock = new IfConditionBlock(condition);	}
+	block(ifConditionBlock)
+	(
+		< ELSE >
+		block(ifConditionBlock.getElse())	)?
+	{
+		return new IfConditionArgument(ifConditionBlock);
+	}
+}
+
+Argument logArgument() :
+{
+	Argument level, text;
+}
+{
+	< LOG > ( <  LEVEL > )? level = argument() ( < TEXT > )? text = argument()
+	{
+		return new LogArgument(level, text);
+	}
+}
+
+Argument newArgument() :
+{
+	Argument result;
+}
+{
+	< NEW >
+	(
+		(  			< HTTP >
+  			{
+				result = new NewHTTPNodeArgument(LiteralArgument.NULL, new LiteralArgument(8080), new LiteralArgument("/"));   			}
+  		)
+  		|
+  		(			< IUNGO >
+			{
+				result = new NewIungoArgument();			}
+		)	)
+	{
+		return result;
+	}
+}
+
+Argument notArgument() :
+{
+	Argument argument;
+}
+{
+	< NOT > argument = argument()
+	{
+		return new NotArgument(argument);
+	}
+}
+
+Argument openArgument() :
+{
+	Argument url, id = LiteralArgument.NULL, result;
+}
+{
+	< OPEN >
+	(
+		< CONFIG > < URL > url = argument()
+		(
+			< ID > id = argument()		)?
+		{
+			result = new OpenConfigArgument(id, url);
+		}
+	)
+	{
+		return result;
+	}
+}
+
+Argument pingArgument() :
+{
+	Argument id = LiteralArgument.NULL, result;
+}
+{
+	< PING >
+	(
+		< ID > id = argument()
+		{
+			result = new EchoRequestArgument(id);
+		}
+	)
+	{
+		return result;
+	}
+}
+
+Argument returnArgument() :
+{
+}
+{
+	< RETURN >
+	{
+		return new ReturnArgument();
+	}
+}
+
+Argument runArgument() :
+{
+	Argument id, node, result;
+}
+{
+	< RUN >
+	(
+		(
+			< CONFIG >
+			(				< ID > id = argument()
+				{
+					result = new RunConfigArgument(id);				}
+			)
+		)
+		|
+		(			< NODE > node = argument()
+			{
+				result = new RunNodeArgument(node);
+			}
+		)
+	)
+	{
+		return result;
+	}
+}
+
+Argument setArgument() :
+{
+	Argument context, key, value;
+}
+{
+	< SET >
+//	< PROPERTY >//	{//		context = LiteralArgument.NULL;//	}//	(//		< CONTEXT > context = argument()//	)?
+	< KEY > key = argument() < VALUE > value = argument()
+	{
+		return new SetValueArgument(key, value);
+	}
+}
+
+Argument showArgument() :
+{
+	Argument context, key = LiteralArgument.NULL, value;
+	Argument result;
+}
+{
+	< SHOW >
+	(
+		(
+			< PROPERTY >
+			{
+				context = LiteralArgument.NULL;
+			}
+			(
+				< KEY >
+				key = argument()
+			)?
+			{
+				result = new ShowContextKeyArgument(null, key);
+			}
+		)
+		|
+		(
+			< MAPPER >
+			{
+				result = new ShowMapperArgument();
+			}
+		)
+		|
+		(
+			< SYSTEM >
+			{
+				result = new ShowSystemArgument();
+			}
+		)
+	)
+	{
+		return result;
+	}
+}
+
+Argument whileArgument() :
+{
+	Argument condition, argument;
+}
+{
+	< WHILE > condition = argument()
+	{
+		final WhileConditionBlock whileConditionBlock = new WhileConditionBlock(condition);	}
+	block(whileConditionBlock)	
+	{
+		return new WhileConditionArgument(whileConditionBlock);
+	}
+}

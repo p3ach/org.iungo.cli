@@ -5,8 +5,11 @@ import java.net.URL;
 import org.iungo.cli.api.CLI;
 import org.iungo.cli.api.Config;
 import org.iungo.cli.api.Method;
-import org.iungo.cli.api.Unit;
+import org.iungo.cli.implementation.CallMethodArgument;
 import org.iungo.cli.implementation.DefaultCLI;
+import org.iungo.cli.implementation.DefaultMethodArguments;
+import org.iungo.cli.implementation.DefaultValues;
+import org.iungo.cli.implementation.LiteralArgument;
 import org.iungo.context.api.Context;
 import org.iungo.context.api.ContextAPI;
 import org.iungo.result.api.Result;
@@ -38,8 +41,9 @@ public class CLIBundleActivator implements BundleActivator {
 		final Context context = ((ContextAPI) getAPI(ContextAPI.class)).createContext();
 		Result result = config.compile(context);
 		System.out.println(result);
-		final Unit unit = result.getValue();
-		System.out.println(unit.go(Method.MAIN_METHOD_NAME, context));
+
+		CallMethodArgument callMethodArgument = new CallMethodArgument(new LiteralArgument("hello world"), new LiteralArgument(Method.MAIN_METHOD_NAME), new DefaultMethodArguments());
+		callMethodArgument.go(context);
 	}
 
 	/*

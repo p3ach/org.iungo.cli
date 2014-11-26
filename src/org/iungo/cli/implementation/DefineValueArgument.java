@@ -37,4 +37,8 @@ public class DefineValueArgument implements Argument {
 		return valueResult; // Which will be Result(true, null, Object)...
 	}
 
+	@Override
+	public String toString() {
+		return String.format("define key %s value %s", key, value);
+	}
 }

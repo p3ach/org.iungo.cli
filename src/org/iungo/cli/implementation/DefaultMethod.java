@@ -1,10 +1,9 @@
 package org.iungo.cli.implementation;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.iungo.cli.api.Block;
 import org.iungo.cli.api.Method;
+import org.iungo.cli.api.MethodLines;
+import org.iungo.cli.api.MethodParameters;
 import org.iungo.cli.osgi.CLIBundleActivator;
 import org.iungo.context.api.Context;
 import org.iungo.result.api.Result;
@@ -14,9 +13,9 @@ public class DefaultMethod implements Method {
 
 	protected final String name;
 	
-	protected final List<String> parameters = new LinkedList<>();
+	protected final MethodParameters parameters = new DefaultMethodParameters();
 	
-	protected final List<String> lines = new LinkedList<>();
+	protected final MethodLines	 lines = new DefaultMethodLines();
 	
 	protected final MethodBlock block = new MethodBlock(this);
 	
@@ -31,12 +30,12 @@ public class DefaultMethod implements Method {
 	}
 
 	@Override
-	public List<String> getParameters() {
+	public MethodParameters getParameters() {
 		return parameters;
 	}
 
 	@Override
-	public List<String> getLines() {
+	public MethodLines getLines() {
 		return lines;
 	}
 
@@ -52,5 +51,10 @@ public class DefaultMethod implements Method {
 		} catch (final Exception exception) {
 			return ((ResultAPI) CLIBundleActivator.getInstance().getAPI(ResultAPI.class)).create(exception);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return String.format("method \"%s\" parameters (%s) {\n%s}", name, parameters, block);
 	}
 }

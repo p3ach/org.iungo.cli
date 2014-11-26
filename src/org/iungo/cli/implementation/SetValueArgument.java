@@ -37,4 +37,9 @@ public class SetValueArgument implements Argument {
 		return valueResult; // Which will be Result(true, null, Object)...
 	}
 
+	@Override
+	public String toString() {
+		return String.format("set key %s value %s", key, value);
+	}
+
 }

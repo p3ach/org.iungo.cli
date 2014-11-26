@@ -1,7 +1,6 @@
 package org.iungo.cli.implementation;
 
 import org.iungo.cli.api.Method;
-import org.iungo.cli.api.Scope;
 
 public class MethodBlock extends DefaultBlock {
 
@@ -11,11 +10,4 @@ public class MethodBlock extends DefaultBlock {
 		super();
 		this.method = method;
 	}
-
-	@Override
-	protected Scope createScope() {
-		return new MethodScope(method);
-	}
-
-	
 }

@@ -8,7 +8,7 @@ public interface Control {
 	
 	Scope popScope();
 	
-	Scope peepScope();
+	Scope peekScope();
 	
 	void defineValue(String key, Object value);
 	

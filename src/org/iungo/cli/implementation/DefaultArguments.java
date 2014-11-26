@@ -1,5 +1,7 @@
 package org.iungo.cli.implementation;
 
+import java.util.Iterator;
+
 import org.iungo.cli.api.Argument;
 import org.iungo.cli.api.Arguments;
 import org.iungo.cli.osgi.CLIBundleActivator;
@@ -36,4 +38,8 @@ public class DefaultArguments implements Arguments {
 		return arguments.add(argument);
 	}
 
+	@Override
+	public Iterator<Argument> iterator() {
+		return arguments.iterator();
+	}
 }

@@ -1,7 +1,5 @@
 package org.iungo.cli.api;
 
-import java.util.List;
-
 import org.iungo.context.api.Context;
 import org.iungo.result.api.Result;
 
@@ -13,9 +11,9 @@ public interface Method {
 	
 	String getName();
 	
-	List<String> getParameters();
+	MethodParameters getParameters();
 	
-	List<String> getLines();
+	MethodLines getLines();
 	
 	Block getBlock();
 	

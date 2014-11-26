@@ -44,6 +44,7 @@ SKIP :
 TOKEN :
 {
   < ARGUMENTS : "arguments" >
+| < BOOLEAN : "boolean" >
 | < BREAK : "break" >
 | < CALL : "call" >
 | < CLOSE : "close" >
@@ -55,16 +56,20 @@ TOKEN :
 | < DEFINE : "define" >
 | < DISCONNECT : "disconnect" >
 | < ELSE : "else" >
+| < FALSE : "false" >
 | < GET : "get" >
 | < GREP : "grep" >
 | < HTTP : "http" >
 | < ID : "id" >
 | < IF : "if" >
 | < INPUT : "input" >
+| < INTEGER : "integer" >
 | < IUNGO : "iungo" >
 | < KEY : "key" >
 | < LEVEL : "level" >
+| < LITERAL : "literal" >
 | < LOG : "log" >
+| < LONG : "long" >
 | < MAPPER : "mapper" >
 | < METHOD : "method" >
 | < NEW : "new" >
@@ -81,8 +86,10 @@ TOKEN :
 | < RUN : "run" >
 | < SHOW : "show" >
 | < SET : "set" >
+| < STRING : "string" >
 | < SYSTEM : "system" >
 | < TEXT : "text" >
+| < TRUE : "true" >
 | < UNIT : "unit" >
 | < URL : "url" >
 | < VALUE : "value" >
@@ -94,17 +101,9 @@ TOKEN :
 | < COMMA : "," >
 | < PERIOD : "." >
 | < DOUBLE_QUOTED_STRING : "\"" (~["\""])+ "\"" >
-| < FALSE_BOOLEAN : "false" >
-| < TRUE_BOOLEAN : "true" >
-}
-
-/*
-	SKIP.
-*/
-
-< * > SKIP :
-{
-  "/*": IN_COMMENT
+| < #DIGIT : [ "0" - "9" ] >
+| < INTEGER_STRING : ( < DIGIT > )+ >
+| "/*": IN_COMMENT
 }
       
 // When any other character is seen in the IN_COMMENT state, skip it.
@@ -167,7 +166,8 @@ Unit unit() :
 
 Method method() :
 {
-	Token methodName, parameterName;	final List<String> parameters = new LinkedList<String>();
+	Token methodName, name;
+	Argument value;	final List<String> parameters = new LinkedList<String>();
 	final Block block;
 }
 {
@@ -177,13 +177,24 @@ Method method() :
 	< PARAMETERS >
 	< LEFT_BRACKET >
 	(
-		parameterName = < DOUBLE_QUOTED_STRING >
-		{
-			method.getParameters().add(removeDoubleQuotes(parameterName));		}
+		name = < DOUBLE_QUOTED_STRING >
+		{			value = LiteralArgument.NULL;
+		}
 		(
-			< COMMA > parameterName = < DOUBLE_QUOTED_STRING >
+			< VALUE > value = argument()
+		)?
+		{
+			method.getParameters().put(removeDoubleQuotes(name), new DefaultMethodParameter(value));		}
+		(
+			< COMMA > name = < DOUBLE_QUOTED_STRING >
 			{
-				method.getParameters().add(removeDoubleQuotes(parameterName));
+				value = LiteralArgument.NULL;
+			}
+			(
+				< VALUE > value = argument()
+			)?
+			{
+				method.getParameters().put(removeDoubleQuotes(name), new DefaultMethodParameter(value));
 			}
 		)?
 	)*
@@ -191,6 +202,23 @@ Method method() :
 	{
 		block(method.getBlock());
 		return method;	}
+}
+
+void methodParameter(List<String, Value> parameters) :
+{}
+{
+	(
+		parameterName = < DOUBLE_QUOTED_STRING >
+		{
+			value = LiteralArgument.NULL;
+		}
+		(
+			< VALUE > value = argument()
+		)?
+		{
+			method.getParameters().add(removeDoubleQuotes(parameterName));
+		}
+	)
 }
 
 Block block(final Block block) :
@@ -256,6 +284,10 @@ Argument argument() :
 		)
 		| 
 		(
+			argument = literalArgument()
+		)
+		| 
+		(
 			argument = logArgument()
 		)
 		| 
@@ -298,16 +330,21 @@ Argument argument() :
 		(
 			token = < DOUBLE_QUOTED_STRING >
 			{
-				argument = new LiteralArgument(removeDoubleQuotes(token));			}
+				argument = new StringLiteralArgument(removeDoubleQuotes(token));			}
 		)
 		| 
 		(
-			(				token = < FALSE_BOOLEAN >
-				| token = < TRUE_BOOLEAN >
+			(				< FALSE >
+				{
+					argument = BooleanLiteralArgument.FALSE;				}
 			)
-			{
-				argument = new LiteralArgument(Boolean.valueOf(token.image));
-			}
+			|
+			(
+				< TRUE >
+				{
+					argument = BooleanLiteralArgument.TRUE;
+				}
+			)
 		)
 	)
 	{
@@ -502,6 +539,57 @@ Argument ifArgument() :
 	{
 		return ifConditionBlock;
 	}
+}
+
+Argument literalArgument() :
+{
+	Token value;
+}
+{
+	< LITERAL >
+	(
+		(
+			< BOOLEAN >
+			(
+				< FALSE >
+				{
+					return BooleanLiteralArgument.FALSE;				}
+			)
+			|			(
+				< TRUE >
+				{
+					return BooleanLiteralArgument.TRUE;
+				}
+			)
+		)
+		|
+		(
+			< INTEGER > value = < INTEGER_STRING >
+			{
+				return new IntegerLiteralArgument(Integer.valueOf(value));
+			}
+		)
+		|
+		(
+			< LONG > value = < INTEGER_STRING >
+			{
+				return new LongLiteralArgument(Integer.valueOf(value));
+			}
+		)
+		|
+		(
+			< NULL >
+			{
+				return LiteralArgument.NULL;
+			}
+		)
+		|
+		(
+			< STRING > value = < DOUBLE_QUOTED_STRING >
+			{
+				return new StringLiteralArgument(removeDoubleQuotes(value));			}
+		)
+	)
 }
 
 Argument logArgument() :

@@ -44,4 +44,9 @@ public class GetValueArgument implements Argument {
 		return ((ResultAPI) CLIBundleActivator.getInstance().getAPI(ResultAPI.class)).create(true, null, value);
 	}
 
+	@Override
+	public String toString() {
+		return String.format("get key %s", key);
+	}
+
 }

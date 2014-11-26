@@ -22,13 +22,13 @@ public class DefaultControl implements Control {
 	}
 
 	@Override
-	public Scope peepScope() {
+	public Scope peekScope() {
 		return entries.peek();
 	}
 
 	@Override
 	public void defineValue(String key, Object value) {
-		peepScope().defineValue(key, value);
+		peekScope().defineValue(key, value);
 	}
 
 	@Override

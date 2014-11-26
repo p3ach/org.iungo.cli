@@ -15,7 +15,7 @@ public class WhileConditionBlock extends ConditionBlock {
 	@Override
 	public Result go(final Context context) {
 		final CLIContext cliContext = new CLIContext(context);
-		cliContext.getControl().pushScope(createScope());
+		cliContext.getControl().pushScope(createScope(context));
 		try {
 			Result result = Result.TRUE;
 			while (true) {
@@ -49,5 +49,8 @@ public class WhileConditionBlock extends ConditionBlock {
 		}
 	}
 
-	
+	@Override
+	public String toString() {
+		return String.format("while (%s) {\n%s\n}", condition, super.toString());
+	}
 }

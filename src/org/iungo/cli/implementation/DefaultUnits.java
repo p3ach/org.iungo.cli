@@ -1,5 +1,7 @@
 package org.iungo.cli.implementation;
 
+import java.util.Map.Entry;
+
 import org.iungo.cli.api.Unit;
 import org.iungo.cli.api.Units;
 import org.iungo.cli.osgi.CLIBundleActivator;
@@ -31,4 +33,12 @@ public class DefaultUnits implements Units {
 		return ((Unit) context.get(unit)).go(method, context);
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder result = new StringBuilder();
+		for (Entry<String, Object> entry : context.getEntries()) {
+			result.append(String.format("\n%s", entry.getKey()));
+		}
+		return result.toString();
+	}
 }

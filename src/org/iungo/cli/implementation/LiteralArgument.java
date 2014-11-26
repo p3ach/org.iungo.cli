@@ -8,7 +8,12 @@ import org.iungo.result.api.ResultAPI;
 
 public class LiteralArgument implements Argument {
 	
-	public static final LiteralArgument NULL = new LiteralArgument(null);
+	public static final LiteralArgument NULL = new LiteralArgument(null) {
+		@Override
+		public String toString() {
+			return "literal null";
+		}
+	};
 	
 	public static final LiteralArgument FALSE = new LiteralArgument(false);
 	
@@ -26,6 +31,11 @@ public class LiteralArgument implements Argument {
 	@Override
 	public Result go(final Context context) {
 		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "literal";
 	}
 
 }

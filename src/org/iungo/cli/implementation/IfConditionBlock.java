@@ -18,7 +18,7 @@ public class IfConditionBlock extends ConditionBlock {
 	@Override
 	public Result go(final Context context) {
 		final CLIContext cliContext = new CLIContext(context);
-		cliContext.getControl().pushScope(createScope());
+		cliContext.getControl().pushScope(createScope(context));
 		try {
 			Result result = condition.go(context);
 			if (result.getState()) {

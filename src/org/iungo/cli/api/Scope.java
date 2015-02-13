@@ -2,26 +2,24 @@ package org.iungo.cli.api;
 
 import java.util.Map;
 
-import org.iungo.cli.osgi.CLIBundleActivator;
 import org.iungo.id.api.ID;
-import org.iungo.id.api.IDAPI;
 import org.iungo.result.api.Result;
 
 public interface Scope {
 
 	static final String ID_ROOT = Scope.class.getName();
 	
-	static final ID VALUES = ((IDAPI) CLIBundleActivator.getInstance().getAPI(IDAPI.class)).createID(ID_ROOT, "", "Values");
+	static final ID VALUES = new ID(ID_ROOT, null, "Values");
 	
 	Block getBlock();
 
 	Map<String, Value> getValues();
 	
-	Boolean isDefinedValue(String key);
+	Boolean has(String key);
 	
-	Result defineValue(String key, Object value);
+	Result define(String key, Object value);
 	
-	<T> T getValue(String key);
+	<T> T get(String key);
 	
-	<T> T setValue(String key, Object value);
+	<T> T set(String key, Object value);
 }

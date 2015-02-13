@@ -9,10 +9,9 @@ import org.iungo.cli.api.Control;
 import org.iungo.cli.api.Units;
 import org.iungo.context.api.Context;
 import org.iungo.context.api.ContextGo;
-import org.iungo.result.api.Result;
 
 public class CLIContext {
-
+	
 	protected final Context context;
 
 	public CLIContext(final Context context) {
@@ -62,7 +61,7 @@ public class CLIContext {
 		return context.get(CLI.CONFIGS.getID(), new ContextGo() {
 			@Override
 			public Object go(final Context context) {
-				Configs created = new DefaultConfigs();
+				Configs created = new ConcurrentHashMapConfigs();
 				Configs current = context.putIfAbsent(CLI.CONFIGS.getID(), created);
 				return (current == null ? created : current);
 			}
@@ -77,7 +76,7 @@ public class CLIContext {
 		return context.get(CLI.UNITS.getID(), new ContextGo() {
 			@Override
 			public Object go(final Context context) {
-				Units created = new DefaultUnits();
+				Units created = new Units();
 				Units current = context.putIfAbsent(CLI.UNITS.getID(), created);
 				return (current == null ? created : current);
 			}

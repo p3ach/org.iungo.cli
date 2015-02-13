@@ -1,19 +1,17 @@
-package org.iungo.cli.implementation;
+package org.iungo.cli.api;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.iungo.cli.api.Block;
-import org.iungo.cli.api.Scope;
-import org.iungo.cli.api.Value;
+import org.iungo.cli.implementation.DefaultValue;
 import org.iungo.result.api.Result;
 
 public class BlockScope implements Scope {
-
-	protected final Map<String, Value> values = new HashMap<>();
 	
-	protected final Block block;
+	private final Block block;
+
+	private final Map<String, Value> values = new HashMap<>();
 	
 	public BlockScope(final Block block) {
 		super();
@@ -31,12 +29,12 @@ public class BlockScope implements Scope {
 	}
 	
 	@Override
-	public Boolean isDefinedValue(final String key) {
+	public Boolean has(final String key) {
 		return values.containsKey(key);
 	}
 	
 	@Override
-	public Result defineValue(final String key, final Object value) {
+	public Result define(final String key, final Object value) {
 		if (values.containsKey(key)) {
 			return Result.FALSE;
 		}
@@ -46,7 +44,7 @@ public class BlockScope implements Scope {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getValue(final String key) {
+	public <T> T get(final String key) {
 		if (!values.containsKey(key)) {
 			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
 		}
@@ -55,7 +53,7 @@ public class BlockScope implements Scope {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T setValue(final String key, final Object value) {
+	public <T> T set(final String key, final Object value) {
 		if (!values.containsKey(key)) {
 			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
 		}

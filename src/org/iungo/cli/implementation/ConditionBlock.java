@@ -1,8 +1,9 @@
 package org.iungo.cli.implementation;
 
 import org.iungo.cli.api.Argument;
+import org.iungo.cli.api.Block;
 
-public abstract class ConditionBlock extends DefaultBlock {
+public abstract class ConditionBlock extends Block {
 
 	protected final Argument condition;
 

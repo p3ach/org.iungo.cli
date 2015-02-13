@@ -16,8 +16,8 @@ public class CloseConfigArgument implements Argument {
 	}
 
 	@Override
-	public Result go(final Context context) {
-		return ((ResultAPI) CLIBundleActivator.getInstance().getAPI(ResultAPI.class)).create(new CLIContext(context).getConfigs().removeConfig((String) name.go(context).getValue()) != null, null, null);
+	public Result execute(final Context context) {
+		return ((ResultAPI) CLIBundleActivator.getInstance().getAPI(ResultAPI.class)).create(new CLIContext(context).getConfigs().remove((String) name.execute(context).getValue()) != null, null, null);
 	}
 
 }

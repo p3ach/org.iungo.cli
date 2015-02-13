@@ -4,9 +4,9 @@ public interface Configs {
 
 	static final String ROOT_NS = Configs.class.getName();
 	
-	Config getConfig(String name);
+	Config get(String name);
 	
-	Config addConfig(Config config);
+	void add(Config config);
 	
-	Config removeConfig(String name);
+	void remove(String name);
 }

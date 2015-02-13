@@ -4,7 +4,6 @@ import org.iungo.cli.api.Argument;
 import org.iungo.cli.osgi.CLIBundleActivator;
 import org.iungo.context.api.Context;
 import org.iungo.result.api.Result;
-import org.iungo.result.api.ResultAPI;
 
 public class WhileConditionBlock extends ConditionBlock {
 
@@ -13,15 +12,15 @@ public class WhileConditionBlock extends ConditionBlock {
 	}
 
 	@Override
-	public Result go(final Context context) {
+	public Result execute(final Context context) {
 		final CLIContext cliContext = new CLIContext(context);
 		cliContext.getControl().pushScope(createScope(context));
 		try {
 			Result result = Result.TRUE;
 			while (true) {
-				result = condition.go(context);
+				result = condition.execute(context);
 				if (result.getState() && ((Boolean) result.getValue())) {
-					result = super.go(context);
+					result = super.execute(context);
 					if (result.getState()) {
 						if (flowControl > 0) {
 							if (flowControl == RETURN_FLOW_CONTROL) {
@@ -43,7 +42,7 @@ public class WhileConditionBlock extends ConditionBlock {
 			}
 			return result;
 		} catch (final Exception exception) {
-			return ((ResultAPI) CLIBundleActivator.getInstance().getAPI(ResultAPI.class)).create(exception);
+			return Result.valueOf(exception);
 		} finally {
 			cliContext.getControl().popScope();
 		}

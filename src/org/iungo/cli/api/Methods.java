@@ -1,8 +1,32 @@
 package org.iungo.cli.api;
 
-public interface Methods {
-	
-	Method get(String name);
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-	void add(Method method);
+public class Methods {
+	
+	private final ConcurrentMap<String, Method> methods = new ConcurrentHashMap<>();
+	
+	public Method get(final String name) {
+		return methods.get(name);
+	}
+
+	public void add(final Method method) {
+		methods.put(method.getName(), method);
+	}
+	
+	public void remove(final String name) {
+		methods.remove(name);
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder result = new StringBuilder(2048);
+		final Iterator<Method> iterator = methods.values().iterator();
+		while (iterator.hasNext()) {
+			result.append(String.format("\n%s", iterator.next().toString()));
+		}
+		return result.toString();
+	}
 }

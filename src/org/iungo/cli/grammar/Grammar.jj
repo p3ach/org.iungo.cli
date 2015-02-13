@@ -7,7 +7,7 @@ options
   static = false;
 }
 
-PARSER_BEGIN(DefaultGrammar)
+PARSER_BEGIN(Grammar)
 package org.iungo.cli.grammar;
 
 import java.util.*;
@@ -19,7 +19,7 @@ import org.iungo.cli.implementation.*;
 * JavaCC generates some {if (true) return ...;} statements which causes "unused" warnings when the generated class file is compiled...
 */
 @SuppressWarnings("unused")
-public class DefaultGrammar extends AbstractGrammar
+public class Grammar extends AbstractGrammar
 {
 	/*
 	* Class.
@@ -31,7 +31,7 @@ public class DefaultGrammar extends AbstractGrammar
 
 }
 
-PARSER_END(DefaultGrammar)
+PARSER_END(Grammar)
 
 SKIP :
 {
@@ -107,7 +107,7 @@ TOKEN :
 }
       
 // When any other character is seen in the IN_COMMENT state, skip it.
-< IN_COMMENT > SKIP : { <  ~[] > }
+< IN_COMMENT > SKIP : { < ~[] > }
 
 // When a */ is seen in the IN_COMMENT state, skip it and switch back to the DEFAULT state
 < IN_COMMENT > SKIP : { "*/": DEFAULT }
@@ -123,7 +123,7 @@ Unit compile() :
 		|
 		(
 			{
-				unit = new DefaultUnit(createUnitName());
+				unit = new Unit(createUnitName());
 			}
 			method = method()
 			{
@@ -133,8 +133,8 @@ Unit compile() :
 		|
 		(
 			{
-				unit = new DefaultUnit(createUnitName());
-				method = new DefaultMethod(Method.MAIN_METHOD_NAME);				unit.getMethods().add(method);
+				unit = new Unit(createUnitName());
+				method = new Method(Method.MAIN_METHOD_NAME);				unit.getMethods().add(method);
 			}
 			block(method.getBlock())
 		)
@@ -150,7 +150,7 @@ Unit unit() :
 }
 {
 	< UNIT > unitName = < DOUBLE_QUOTED_STRING >
-	{		final Unit unit = new DefaultUnit(removeDoubleQuotes(unitName));
+	{		final Unit unit = new Unit(removeDoubleQuotes(unitName));
 	}
 	< BEGIN_BLOCK >
 	(
@@ -166,27 +166,26 @@ Unit unit() :
 
 Method method() :
 {
-	Token methodName, name;
-	Argument value;	final List<String> parameters = new LinkedList<String>();
-	final Block block;
-}
+	Token methodName;}
 {
 	< METHOD > methodName = < DOUBLE_QUOTED_STRING >
 	{
-		final Method method = new DefaultMethod(removeDoubleQuotes(methodName));	}
+		final Method method = new Method(removeDoubleQuotes(methodName));	}
 	< PARAMETERS >
 	< LEFT_BRACKET >
 	(
-		name = < DOUBLE_QUOTED_STRING >
+		{
+			Argument key, value;		}
+		< KEY > key = argument()
 		{			value = LiteralArgument.NULL;
 		}
 		(
 			< VALUE > value = argument()
 		)?
 		{
-			method.getParameters().put(removeDoubleQuotes(name), new DefaultMethodParameter(value));		}
+			method.getParameters().add(new MethodParameter(key, value));		}
 		(
-			< COMMA > name = < DOUBLE_QUOTED_STRING >
+			< COMMA > < KEY > key = argument()
 			{
 				value = LiteralArgument.NULL;
 			}
@@ -194,7 +193,7 @@ Method method() :
 				< VALUE > value = argument()
 			)?
 			{
-				method.getParameters().put(removeDoubleQuotes(name), new DefaultMethodParameter(value));
+				method.getParameters().add(new MethodParameter(key, value));
 			}
 		)?
 	)*
@@ -204,23 +203,6 @@ Method method() :
 		return method;	}
 }
 
-void methodParameter(List<String, Value> parameters) :
-{}
-{
-	(
-		parameterName = < DOUBLE_QUOTED_STRING >
-		{
-			value = LiteralArgument.NULL;
-		}
-		(
-			< VALUE > value = argument()
-		)?
-		{
-			method.getParameters().add(removeDoubleQuotes(parameterName));
-		}
-	)
-}
-
 Block block(final Block block) :
 {	Argument argument;
 }
@@ -228,12 +210,12 @@ Block block(final Block block) :
 	(
 		argument = argument()
 		{
-			block.addArgument(argument);
+			block.add(argument);
 		}
 	)*
 	< END_BLOCK >
 	{
-		return new DefaultBlock();	}
+		return new Block();	}
 }
 
 Argument argument() :
@@ -326,6 +308,9 @@ Argument argument() :
 		(
 			argument = whileArgument()
 		)
+		/*
+		* The following are LiteralArgument shortcuts.
+		*/
 		| 
 		(
 			token = < DOUBLE_QUOTED_STRING >
@@ -346,6 +331,18 @@ Argument argument() :
 				}
 			)
 		)
+		|
+		(
+			< NULL >
+			{
+				argument = LiteralArgument.NULL;			}		)
+		|
+		(
+			token = < INTEGER_STRING >
+			{
+				argument = new IntegerLiteralArgument(Integer.valueOf(token.image));
+			}
+		)
 	)
 	{
 		return argument;	}
@@ -364,29 +361,41 @@ Argument callArgument() :
 }
 {
 	< CALL >
-	< UNIT > unitName = argument()
-	< METHOD > methodName = argument()
-	{
-		Arguments arguments = new DefaultArguments();
-	}
-	(		< ARGUMENTS >
+	(		< UNIT > unitName = argument()
+		< METHOD > methodName = argument()
 		{
-			Argument argument;		}
-		< LEFT_BRACKET >
+			MethodArguments arguments = new MethodArguments();
+		}
 		(
-			argument = argument()
+			< ARGUMENTS >
 			{
-				arguments.addArgument(argument);
-			}
+				Argument key, value;			}
+			< LEFT_BRACKET >
 			(
-				< COMMA > argument = argument()
+				< KEY > key = argument()
 				{
-				arguments.addArgument(argument);
+					value = LiteralArgument.NULL;				}
+				(
+					< VALUE > value = argument()				)?
+				{
+					arguments.add(new MethodArgument(key, value));
 				}
-			)?
-		)*
-		< RIGHT_BRACKET >
-	)?
+				(
+					< COMMA > < KEY > key = argument()
+					{
+						value = LiteralArgument.NULL;
+					}
+					(
+						< VALUE > value = argument()
+					)?
+					{
+						arguments.add(new MethodArgument(key, value));
+					}
+				)?
+			)*
+			< RIGHT_BRACKET >
+)?
+	)
 	{
 		return new CallMethodArgument(unitName, methodName, arguments);	}
 }
@@ -452,7 +461,7 @@ Argument defineArgument() :
 }
 {
 	< DEFINE >
-	(
+//	(
 		< KEY > key = argument()
 		{
 			value = LiteralArgument.NULL;		}
@@ -461,7 +470,7 @@ Argument defineArgument() :
 		{
 			result = new DefineValueArgument(key, value);
 		}
-	)
+//	)
 	{
 		return result;
 	}

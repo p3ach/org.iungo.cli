@@ -1,17 +1,50 @@
 package org.iungo.cli.api;
 
-import org.iungo.context.api.Context;
-import org.iungo.result.api.Result;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public interface Units {
+import org.iungo.logger.api.Logger;
+import org.iungo.logger.api.SimpleLogger;
 
-	static final String ROOT_NS = Units.class.getName();
+public class Units implements Iterable<Entry<String, Unit>> {
+
+	private static final Logger logger = new SimpleLogger(Units.class.getName());
 	
-	Unit addUnit(Unit unit);
+	public static final String ROOT_NS = Units.class.getName();
 	
-	Unit removeUnit(String name);
+	private final ConcurrentMap<String, Unit> units = new ConcurrentHashMap<>();
+
+	public Unit get(final String name) {
+		return units.get(name);
+	}
 	
-	Unit getUnit(String name);
-	
-	Result go(String unit, String method, Context context);
+	public void add(final Unit unit) {
+		logger.debug(String.format("add(%s)", unit.getName()));
+		units.put(unit.getName(), unit);
+	}
+
+	public void remove(final String name) {
+		logger.debug(String.format("remove(%s)", name));
+		units.remove(name);
+	}
+
+	@Override
+	public Iterator<Entry<String, Unit>> iterator() {
+		return units.entrySet().iterator();
+	}
+	@Override
+	public String toString() {
+		final StringBuilder result = new StringBuilder();
+		final Iterator<String> iterator = units.keySet().iterator();
+		if (iterator.hasNext()) {
+			result.append(iterator.next());
+			while (iterator.hasNext()) {
+				result.append(String.format("\n%s", iterator.next()));
+			}
+		}
+		return result.toString();
+	}
+
 }

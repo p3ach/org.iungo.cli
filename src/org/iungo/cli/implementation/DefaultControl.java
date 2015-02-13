@@ -28,7 +28,7 @@ public class DefaultControl implements Control {
 
 	@Override
 	public void defineValue(String key, Object value) {
-		peekScope().defineValue(key, value);
+		peekScope().define(key, value);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class DefaultControl implements Control {
 		if (scope == null) {
 			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
 		}
-		return scope.getValue(key);
+		return scope.get(key);
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class DefaultControl implements Control {
 		if (scope == null) {
 			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
 		}
-		scope.setValue(key, value);
+		scope.set(key, value);
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class DefaultControl implements Control {
 		Iterator<Scope> iterator = entries.descendingIterator();
 		while (iterator.hasNext()) {
 			Scope scope = iterator.next();
-			if (scope.isDefinedValue(key)) {
+			if (scope.has(key)) {
 				return scope;
 			}
 		}

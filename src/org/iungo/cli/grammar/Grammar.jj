@@ -308,41 +308,7 @@ Argument argument() :
 		(
 			argument = whileArgument()
 		)
-		/*
-		* The following are LiteralArgument shortcuts.
-		*/
-		| 
-		(
-			token = < DOUBLE_QUOTED_STRING >
-			{
-				argument = new StringLiteralArgument(removeDoubleQuotes(token));			}
-		)
-		| 
-		(
-			(				< FALSE >
-				{
-					argument = BooleanLiteralArgument.FALSE;				}
-			)
-			|
-			(
-				< TRUE >
-				{
-					argument = BooleanLiteralArgument.TRUE;
-				}
-			)
-		)
-		|
-		(
-			< NULL >
-			{
-				argument = LiteralArgument.NULL;			}		)
-		|
-		(
-			token = < INTEGER_STRING >
-			{
-				argument = new IntegerLiteralArgument(Integer.valueOf(token.image));
-			}
-		)
+		/*		* The following are LiteralArgument shortcuts.		*/		| 		(			token = < DOUBLE_QUOTED_STRING >			{				argument = new StringLiteralArgument(removeDoubleQuotes(token));			}		)		| 		(			(				< FALSE >				{					argument = BooleanLiteralArgument.FALSE;				}			)			|			(				< TRUE >				{					argument = BooleanLiteralArgument.TRUE;				}			)		)		|		(			< NULL >			{				argument = LiteralArgument.NULL;			}		)		|		(			token = < INTEGER_STRING >			{				argument = new IntegerLiteralArgument(Integer.valueOf(token.image));			}		)
 	)
 	{
 		return argument;	}
@@ -366,35 +332,33 @@ Argument callArgument() :
 		{
 			MethodArguments arguments = new MethodArguments();
 		}
+		< ARGUMENTS >
+		{
+			Argument key, value;		}
+		< LEFT_BRACKET >
 		(
-			< ARGUMENTS >
+			< KEY > key = argument()
 			{
-				Argument key, value;			}
-			< LEFT_BRACKET >
+				value = LiteralArgument.NULL;			}
 			(
-				< KEY > key = argument()
+				< VALUE > value = argument()			)?
+			{
+				arguments.add(new MethodArgument(key, value));
+			}
+			(
+				< COMMA > < KEY > key = argument()
 				{
-					value = LiteralArgument.NULL;				}
+					value = LiteralArgument.NULL;
+				}
 				(
-					< VALUE > value = argument()				)?
+					< VALUE > value = argument()
+				)?
 				{
 					arguments.add(new MethodArgument(key, value));
 				}
-				(
-					< COMMA > < KEY > key = argument()
-					{
-						value = LiteralArgument.NULL;
-					}
-					(
-						< VALUE > value = argument()
-					)?
-					{
-						arguments.add(new MethodArgument(key, value));
-					}
-				)?
-			)*
-			< RIGHT_BRACKET >
-)?
+			)?
+		)*
+		< RIGHT_BRACKET >
 	)
 	{
 		return new CallMethodArgument(unitName, methodName, arguments);	}
@@ -466,6 +430,7 @@ Argument defineArgument() :
 		{
 			value = LiteralArgument.NULL;		}
 		(
+			LOOKAHEAD(2)
 			< VALUE > value = argument()		)?
 		{
 			result = new DefineValueArgument(key, value);
@@ -504,7 +469,8 @@ Argument getArgument() :
 	< KEY > key = argument()
 	{
 		value = LiteralArgument.NULL;	}
-	(		< IF > < NULL > value = argument()
+	(		LOOKAHEAD(2)
+		< IF > < NULL > value = argument()
 	)?
 	{
 		return new GetValueArgument(key, value);
@@ -653,6 +619,7 @@ Argument openArgument() :
 	(
 		< CONFIG > < URL > url = argument()
 		(
+			LOOKAHEAD(2)
 			< ID > id = argument()		)?
 		{
 			result = new OpenConfigArgument(id, url);
@@ -743,8 +710,8 @@ Argument showArgument() :
 				context = LiteralArgument.NULL;
 			}
 			(
-				< KEY >
-				key = argument()
+				LOOKAHEAD(2)
+				< KEY > key = argument()
 			)?
 			{
 				result = new ShowContextKeyArgument(null, key);

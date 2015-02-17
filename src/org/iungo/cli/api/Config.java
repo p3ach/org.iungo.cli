@@ -10,5 +10,5 @@ public interface Config {
 	
 	List<String> getLines();
 	
-	Result compile();
+	Result parse();
 }

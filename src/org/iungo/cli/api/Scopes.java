@@ -20,7 +20,10 @@ public class Scopes {
 
 	public Scope pop() {
 		logger.debug("pop()");
-		return scopes.pop();
+		try {
+			return scopes.pop();
+		} finally {
+		}
 	}
 
 	public Scope peek() {

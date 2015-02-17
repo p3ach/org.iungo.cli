@@ -8,6 +8,7 @@ Bundle-Vendor: Iungo
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.iungo.common.api,
  org.iungo.context.api,
+ org.iungo.exception.api,
  org.iungo.id.api,
  org.iungo.logger.api,
  org.iungo.result.api,

@@ -44,18 +44,16 @@ public abstract class AbstractGrammar {
 
 	private final AtomicInteger unitNameSequence = new AtomicInteger();
 	
-	public Result go(final Context context) {
+	public Result tryParse() {
 		try {
-			return new Result(true, null, compile());
+			return new Result(true, null, parse());
 		} catch (final Exception exception) {
-//			final Context context = new Context();
-//			context.put(THROWABLE_KEY, throwable);
-//			final String message = throwable.getMessage();
-//			Integer index = message.indexOf("line ");
+			final String message = exception.getMessage();
+			final Integer lineIndex = message.indexOf("line ");
 //			if (index != -1) {
 //				context.put(LINE_KEY, Integer.valueOf(message.substring(index + 5, message.indexOf(","))));
 //			}
-//			index = message.indexOf("column ");
+			final Integer columnIndex = message.indexOf("column ");
 //			if (index != -1) {
 //				context.put(COLUMN_KEY, Integer.valueOf(message.substring(index + 7, message.indexOf("."))));
 //			}
@@ -84,5 +82,5 @@ public abstract class AbstractGrammar {
 //		}
 	}
 	
-	protected abstract Unit compile() throws ParseException;
+	public abstract Unit parse() throws ParseException;
 }

@@ -1,6 +1,7 @@
 package org.iungo.cli.api;
 
 import org.iungo.id.api.ID;
+import org.iungo.result.api.Result;
 
 public interface CLI {
 
@@ -12,11 +13,17 @@ public interface CLI {
 
 	static final ID CONTROL = new ID(ROOT_NS, null, Control.NS);
 	
-	static final ID CONFIGS = new ID(ROOT_NS, Configs.ROOT_NS, null);
+	static final ID CONFIGS = new ID(ROOT_NS, Configs.ID_ROOT, null);
 
 	static final ID UNITS = new ID(ROOT_NS, Units.ROOT_NS, null);
 
 	Configs getConfigs();
 
 	Units getUnits();
+	
+	Result compile(String name);
+	
+	Result execute(String name);
+	
+	Result parse(String text);
 }

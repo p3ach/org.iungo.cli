@@ -21,5 +21,5 @@ public interface Scope {
 	
 	<T> T get(String key);
 	
-	<T> T set(String key, Object value);
+	<T> T set(String key, T value);
 }

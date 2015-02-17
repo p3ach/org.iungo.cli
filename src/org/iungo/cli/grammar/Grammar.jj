@@ -43,7 +43,8 @@ SKIP :
 
 TOKEN :
 {
-  < ARGUMENTS : "arguments" >
+  < SEMI_COLON : ";" >
+| < ARGUMENTS : "arguments" >
 | < BOOLEAN : "boolean" >
 | < BREAK : "break" >
 | < CALL : "call" >
@@ -57,6 +58,7 @@ TOKEN :
 | < DISCONNECT : "disconnect" >
 | < ELSE : "else" >
 | < FALSE : "false" >
+| < FROM : "from" >
 | < GET : "get" >
 | < GREP : "grep" >
 | < HTTP : "http" >
@@ -72,6 +74,7 @@ TOKEN :
 | < LONG : "long" >
 | < MAPPER : "mapper" >
 | < METHOD : "method" >
+| < NAME : "name" >
 | < NEW : "new" >
 | < NODE : "node" >
 | < NOT : "not" >
@@ -112,7 +115,7 @@ TOKEN :
 // When a */ is seen in the IN_COMMENT state, skip it and switch back to the DEFAULT state
 < IN_COMMENT > SKIP : { "*/": DEFAULT }
 
-Unit compile() :
+Unit parse() :
 {
 	Unit unit;
 	Method method;
@@ -134,7 +137,7 @@ Unit compile() :
 		(
 			{
 				unit = new Unit(createUnitName());
-				method = new Method(Method.MAIN_METHOD_NAME);				unit.getMethods().add(method);
+				method = new SimpleMethod(Method.MAIN_METHOD_NAME);				unit.getMethods().add(method);
 			}
 			block(method.getBlock())
 		)
@@ -170,7 +173,7 @@ Method method() :
 {
 	< METHOD > methodName = < DOUBLE_QUOTED_STRING >
 	{
-		final Method method = new Method(removeDoubleQuotes(methodName));	}
+		final Method method = new SimpleMethod(removeDoubleQuotes(methodName));	}
 	< PARAMETERS >
 	< LEFT_BRACKET >
 	(
@@ -212,6 +215,7 @@ Block block(final Block block) :
 		{
 			block.add(argument);
 		}
+//		< SEMI_COLON >
 	)*
 	< END_BLOCK >
 	{
@@ -612,17 +616,14 @@ Argument notArgument() :
 
 Argument openArgument() :
 {
-	Argument url, id = LiteralArgument.NULL, result;
+	Argument name, url, result;
 }
 {
 	< OPEN >
 	(
-		< CONFIG > < URL > url = argument()
-		(
-			LOOKAHEAD(2)
-			< ID > id = argument()		)?
+		< CONFIG > < NAME > name = argument() < FROM > < URL > url = argument()
 		{
-			result = new OpenConfigArgument(id, url);
+			result = new OpenConfigFromURLArgument(name, url);
 		}
 	)
 	{

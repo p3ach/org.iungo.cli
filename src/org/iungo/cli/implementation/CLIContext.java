@@ -5,6 +5,7 @@ import java.util.Stack;
 import org.iungo.cli.api.Block;
 import org.iungo.cli.api.CLI;
 import org.iungo.cli.api.Configs;
+import org.iungo.cli.api.Configs;
 import org.iungo.cli.api.Control;
 import org.iungo.cli.api.Units;
 import org.iungo.context.api.Context;
@@ -61,7 +62,7 @@ public class CLIContext {
 		return context.get(CLI.CONFIGS.getID(), new ContextGo() {
 			@Override
 			public Object go(final Context context) {
-				Configs created = new ConcurrentHashMapConfigs();
+				Configs created = new Configs();
 				Configs current = context.putIfAbsent(CLI.CONFIGS.getID(), created);
 				return (current == null ? created : current);
 			}

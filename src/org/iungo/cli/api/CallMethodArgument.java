@@ -1,6 +1,5 @@
 package org.iungo.cli.api;
 
-import org.iungo.cli.implementation.CallMethodBlock;
 import org.iungo.logger.api.Logger;
 import org.iungo.logger.api.SimpleLogger;
 import org.iungo.result.api.Result;
@@ -28,7 +27,7 @@ public class CallMethodArgument implements Argument {
 			/*
 			 * Unit name.
 			 */
-			Result result = unitName.execute(executeEnvironment);
+			Result result = executeEnvironment.execute(unitName);
 			if (result.isFalse()) {
 				return result;
 			}
@@ -41,7 +40,7 @@ public class CallMethodArgument implements Argument {
 			/*
 			 * Method name.
 			 */
-			result = methodName.execute(executeEnvironment);
+			result = executeEnvironment.execute(methodName);
 			if (result.isFalse()) {
 				return result;
 			}

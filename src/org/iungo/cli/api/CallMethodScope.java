@@ -1,17 +1,5 @@
-package org.iungo.cli.implementation;
+package org.iungo.cli.api;
 
-import org.iungo.cli.api.Block;
-import org.iungo.cli.api.BlockScope;
-import org.iungo.cli.api.ExecuteEnvironment;
-import org.iungo.cli.api.Method;
-import org.iungo.cli.api.MethodArguments;
-import org.iungo.cli.api.SimpleMethod;
-import org.iungo.cli.api.MethodArgument;
-import org.iungo.cli.api.MethodArguments;
-import org.iungo.cli.api.MethodParameter;
-import org.iungo.cli.osgi.CLIBundleActivator;
-import org.iungo.context.api.Context;
-import org.iungo.result.api.Result;
 
 /**
  * Create the Scope for calling the given Method with the given Arguments.

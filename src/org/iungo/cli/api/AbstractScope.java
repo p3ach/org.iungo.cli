@@ -63,12 +63,11 @@ public abstract class AbstractScope implements Scope {
 				result.append(String.format("\n%s [Class [%s]]", entry.getKey(), (entry.getValue() == null ? null : entry.getValue().getClass().toString())));
 			}
 		}
-		result.append("\n]");
 		return result.toString();
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("%s [\nValues [\n%s\n]\n]", AbstractScope.class.getName(), valuesToString());
+		return String.format("%s [\nValues [\n%s\n]\n]", this.getClass().getName(), valuesToString());
 	}
 }

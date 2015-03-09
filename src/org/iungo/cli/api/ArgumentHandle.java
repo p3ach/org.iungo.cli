@@ -4,5 +4,5 @@ import org.iungo.result.api.Result;
 
 public interface ArgumentHandle {
 
-	Result go(Argument argument);
+	Result go(Result result);
 }

@@ -1,5 +1,7 @@
 package org.iungo.cli.implementation;
 
+import org.iungo.cli.api.LiteralArgument;
+
 public class LongLiteralArgument extends LiteralArgument {
 
 	public LongLiteralArgument(final Long value) {

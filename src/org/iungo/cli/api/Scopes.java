@@ -30,7 +30,7 @@ public class Scopes {
 		logger.debug("peek()");
 		return scopes.peek();
 	}
-
+	
 	public void define(final String key, final Object value) {
 		logger.debug(String.format("define(%s, %s)", key, (value == null ? null : value.getClass())));
 		peek().define(key, value);

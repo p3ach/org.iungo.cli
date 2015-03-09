@@ -12,7 +12,7 @@ public class AdhocMethodBlock extends MethodBlock {
 	 */
 	@Override
 	protected Scope createScope(final ExecuteEnvironment executeEnvironment) {
-		return executeEnvironment.getScopes().peek();
+		return executeEnvironment.getFames().peek().getScopes().peek();
 	}
 
 	/**

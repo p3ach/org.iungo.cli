@@ -30,7 +30,7 @@ public class SetValueArgument implements Argument {
 				result = value.execute(executeEnvironment);
 				if (result.isTrue()) {
 					final Object value = result.getValue();
-					executeEnvironment.getScopes().set(key, value);
+					executeEnvironment.getFames().peek().getScopes().set(key, value);
 				}
 			}
 			return result;

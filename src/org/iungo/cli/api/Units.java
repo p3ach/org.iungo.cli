@@ -5,12 +5,12 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.iungo.logger.api.Logger;
-import org.iungo.logger.api.SimpleLogger;
+import org.iungo.logger.api.ClassLogger;
+import org.iungo.result.api.Result;
 
 public class Units implements Iterable<Entry<String, Unit>> {
 
-	private static final Logger logger = new SimpleLogger(Units.class.getName());
+	private static final ClassLogger logger = new ClassLogger(Units.class.getName());
 	
 	public static final String ROOT_NS = Units.class.getName();
 	
@@ -20,14 +20,22 @@ public class Units implements Iterable<Entry<String, Unit>> {
 		return units.get(name);
 	}
 	
-	public void add(final Unit unit) {
-		logger.debug(String.format("add(%s)", unit.getName()));
-		units.put(unit.getName(), unit);
+	public Result add(final Unit unit) {
+		logger.begin(String.format("add(%s)", unit.getName()));
+		try {
+			return Result.valueOf(units.putIfAbsent(unit.getName(), unit) == null);
+		} finally {
+			logger.end(String.format("add(%s)", unit.getName()));
+		}
 	}
 
-	public void remove(final String name) {
-		logger.debug(String.format("remove(%s)", name));
-		units.remove(name);
+	public Result remove(final String name) {
+		logger.begin(String.format("remove(%s)", name));
+		try {
+			return Result.valueOf(units.remove(name) != null);
+		} finally {
+			logger.end(String.format("remove(%s)", name));
+		}
 	}
 
 	@Override

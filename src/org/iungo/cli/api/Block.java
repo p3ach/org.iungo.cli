@@ -2,43 +2,34 @@ package org.iungo.cli.api;
 
 import java.util.Iterator;
 
+import org.iungo.result.api.AggregateResult;
 import org.iungo.result.api.Result;
 
 public class Block extends Arguments {
 
 	public static final String ROOT_NS = Block.class.getName();
 	
-	public static final Integer NORMAL_FLOW_CONTROL = 0;
-	
-	public static final Integer BREAK_FLOW_CONTROL = 8;
-
-	public static final Integer CONTINUE_FLOW_CONTROL = 16;
-
-	public static final Integer EXCEPTION_FLOW_CONTROL = 24;
-	
-	public static final Integer RETURN_FLOW_CONTROL = 32;
-
-	protected Integer flowControl = NORMAL_FLOW_CONTROL;
-
-	public void setBreak() {
-		flowControl = BREAK_FLOW_CONTROL;
-	}
-
-	public void setContinue() {
-		flowControl = CONTINUE_FLOW_CONTROL;
-	}
-
-	public void setReturn() {
-		flowControl = RETURN_FLOW_CONTROL;
+	protected Scope createScope(final ExecuteEnvironment executeEnvironment) {
+		return new BlockScope(this);
 	}
 	
 	/**
-	 * Create the Scope for this Block.
-	 * Override in subclasses to create a specific Scope.
+	 * Create the Scope for this Block and push it onto the Stack.
+	 * <p>Override in subclasses to create a specific Scope.
 	 * @return
 	 */
-	protected Scope createScope(final ExecuteEnvironment executeEnvironment) {
-		return new BlockScope(this);
+	protected Scope pushScope(final ExecuteEnvironment executeEnvironment) {
+		final Scope scope = createScope(executeEnvironment);
+		executeEnvironment.getFames().peek().getScopes().push(scope);
+		return scope;
+	}
+
+	/**
+	 * Pop the Scope for this Block from the Stack.
+	 * @param executeEnvironment
+	 */
+	protected void popScope(final ExecuteEnvironment executeEnvironment) {
+		executeEnvironment.getFames().peek().getScopes().pop();
 	}
 	
 	/**
@@ -50,29 +41,37 @@ public class Block extends Arguments {
 		return this;
 	}
 	
+	protected void checkFlow() {
+	}
+
+	/**
+	 * Execute this block by iterating and executing each Argument.
+	 */
 	@Override
 	public Result execute(final ExecuteEnvironment executeEnvironment) {
-		executeEnvironment.getScopes().push(createScope(executeEnvironment));
+		pushScope(executeEnvironment);
 		try {
+			executeEnvironment.getFlowLifecycle().setNormal();
 			Integer index = 0;
+			AggregateResult result = new AggregateResult();
 			final Iterator<Argument> iterator = getArguments().iterator();
 			while (iterator.hasNext()) {
 				Argument argument = iterator.next();
 				index++;
-				Result result = argument.execute(executeEnvironment);
-				if (!result.getState()) {
-					flowControl = EXCEPTION_FLOW_CONTROL;
+				result.add(executeEnvironment.execute(argument));
+				if (result.isFalse()) {
+					executeEnvironment.getFlowLifecycle().setException();
 					return result;
 				}
-				if (flowControl != NORMAL_FLOW_CONTROL) {
+				if (!executeEnvironment.getFlowLifecycle().isState(FlowLifecycle.NORMAL)) {
 					return result;
 				}
 			}
-			return new Result(true, null, index);
+			return result;
 		} catch (final Exception exception) {
 			return Result.valueOf(exception);
 		} finally {
-			executeEnvironment.getScopes().pop();
+			popScope(executeEnvironment);
 		}
 	}
 

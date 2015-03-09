@@ -7,10 +7,16 @@ Bundle-Activator: org.iungo.cli.osgi.CLIBundleActivator
 Bundle-Vendor: Iungo
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.iungo.common.api,
+ org.iungo.common.properties.api,
  org.iungo.context.api,
  org.iungo.exception.api,
+ org.iungo.filter.api,
  org.iungo.id.api,
+ org.iungo.lifecycle.api,
  org.iungo.logger.api,
+ org.iungo.message.api,
  org.iungo.result.api,
+ org.iungo.router.api,
  org.osgi.framework;version="1.3.0"
 Require-Bundle: org.junit
+Export-Package: org.iungo.cli.api

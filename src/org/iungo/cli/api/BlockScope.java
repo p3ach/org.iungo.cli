@@ -14,9 +14,4 @@ public class BlockScope extends AbstractScope {
 	public Block getBlock() {
 		return block;
 	}
-
-	@Override
-	public String toString() {
-		return String.format("%s [\n%s\n]", BlockScope.class.getName(), super.toString());
-	}
 }

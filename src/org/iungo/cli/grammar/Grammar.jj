@@ -54,8 +54,10 @@ TOKEN :
 | < CONSOLE : "console" >
 | < CONTEXT : "context" >
 | < CONTINUE : "continue" >
+| < CREATE : "create" >
 | < DEFINE : "define" >
 | < DISCONNECT : "disconnect" >
+| < ECHO : "echo" >
 | < ELSE : "else" >
 | < FALSE : "false" >
 | < FROM : "from" >
@@ -63,16 +65,19 @@ TOKEN :
 | < GREP : "grep" >
 | < HTTP : "http" >
 | < ID : "id" >
+| < IN : "in" >
 | < IF : "if" >
 | < INPUT : "input" >
 | < INTEGER : "integer" >
 | < IUNGO : "iungo" >
 | < KEY : "key" >
+| < LAST : "last" >
 | < LEVEL : "level" >
 | < LITERAL : "literal" >
 | < LOG : "log" >
 | < LONG : "long" >
 | < MAPPER : "mapper" >
+| < MEMORY : "memory" >
 | < METHOD : "method" >
 | < NAME : "name" >
 | < NEW : "new" >
@@ -82,15 +87,21 @@ TOKEN :
 | < OPEN : "open" >
 | < OPTIONS : "options" >
 | < PARAMETERS : "parameters" >
+| < PARSE : "parse" >
 | < PING : "ping" >
 | < PROPERTY : "property" >
 | < REGEX : "regex" >
+| < REQUEST : "request" >
+| < RESULT : "result" >
 | < RETURN : "return" >
+| < ROUTER : "router" >
 | < RUN : "run" >
 | < SHOW : "show" >
 | < SET : "set" >
+| < STATE : "state" >
 | < STRING : "string" >
 | < SYSTEM : "system" >
+| < TDB : "tdb" >
 | < TEXT : "text" >
 | < TRUE : "true" >
 | < UNIT : "unit" >
@@ -163,6 +174,7 @@ Unit unit() :
 	)*
 	< END_BLOCK >
 	{
+		unitCount++;
 		return unit;
 	}
 }
@@ -202,6 +214,7 @@ Method method() :
 	)*
 	< RIGHT_BRACKET >
 	{
+		methodCount++;
 		block(method.getBlock());
 		return method;	}
 }
@@ -215,7 +228,6 @@ Block block(final Block block) :
 		{
 			block.add(argument);
 		}
-//		< SEMI_COLON >
 	)*
 	< END_BLOCK >
 	{
@@ -250,11 +262,19 @@ Argument argument() :
 		)
 		| 
 		(
+			argument = createArgument()
+		)
+		| 
+		(
 			argument = defineArgument()
 		)
 		| 
 		(
 			argument = disconnectArgument()
+		)
+		| 
+		(
+			argument = echoArgument()
 		)
 		| 
 		(
@@ -290,6 +310,10 @@ Argument argument() :
 		)
 		| 
 		(
+			argument = parseArgument()
+		)
+		| 
+		(
 			argument = pingArgument()
 		)
 		| 
@@ -315,6 +339,7 @@ Argument argument() :
 		/*		* The following are LiteralArgument shortcuts.		*/		| 		(			token = < DOUBLE_QUOTED_STRING >			{				argument = new StringLiteralArgument(removeDoubleQuotes(token));			}		)		| 		(			(				< FALSE >				{					argument = BooleanLiteralArgument.FALSE;				}			)			|			(				< TRUE >				{					argument = BooleanLiteralArgument.TRUE;				}			)		)		|		(			< NULL >			{				argument = LiteralArgument.NULL;			}		)		|		(			token = < INTEGER_STRING >			{				argument = new IntegerLiteralArgument(Integer.valueOf(token.image));			}		)
 	)
 	{
+		argumentCount++;
 		return argument;	}
 }
 
@@ -376,22 +401,12 @@ Argument closeArgument() :
 	< CLOSE >
 	(
 		(
-			< CONFIG > id = argument()
+			< NODE > id = argument()
 			{
-				result = new CloseConfigArgument(id);
+				result = new CloseNodeArgument(id);
 			}
 		)
-		|
-		(
-			< CONSOLE >
-			{
-				result = new CloseConsoleArgument();			}		)
-		|
-		(
-			< IUNGO > iungo = argument()
-			{
-				result = new CloseIungoArgument(iungo);			}
-		)	)
+	)
 	{
 		return result;
 	}
@@ -419,6 +434,23 @@ Argument continueArgument() :
 	< CONTINUE >
 	{
 		return new ContinueFlowControlArgument();
+	}
+}
+
+Argument createArgument() :
+{
+	Argument result;
+}
+{
+	< CREATE >
+	(
+		< TDB > < NODE >
+		(
+			< IN > < MEMORY >
+			{
+				result = new CreateTDBNodeArgument(LiteralArgument.NULL);			}		)	)
+	{
+		return result;
 	}
 }
 
@@ -462,22 +494,68 @@ Argument disconnectArgument() :
 	}
 }
 
+Argument echoArgument() :
+{
+	Argument id, result;
+}
+{
+	< ECHO >
+	(
+		< REQUEST > < NODE > < ID > id = argument()
+		{
+			result = new NodeEchoRequestArgument(id);
+		}
+	)
+	{
+		return result;
+	}
+}
+
 Argument getArgument() :
 {
-	Argument context, key, value;
+	Argument context, key, value, result;
 }
 {
 	< GET >
-//	< PROPERTY >
-//	{//		context = LiteralArgument.NULL;//	}//	(//		< CONTEXT > context = argument()//	)?
-	< KEY > key = argument()
+	(
+		(
+			< KEY > key = argument()
+			{
+				value = LiteralArgument.NULL;			}
+			(				LOOKAHEAD(2)
+				< IF > < NULL > value = argument()
+			)?
+			{
+				result = new GetValueArgument(key, value);
+			}
+		)
+		|
+		(
+			< LAST > < RESULT >
+			(
+				(
+					< STATE >					{
+						result = new GetValueArgument(new LiteralArgument(ExecuteEnvironmentScope.RESULT_STATE), LiteralArgument.NULL);
+					}
+				)
+				|				(
+					< TEXT >
+					{
+						result = new GetValueArgument(new LiteralArgument(ExecuteEnvironmentScope.RESULT_TEXT), LiteralArgument.NULL);
+					}
+				)
+				|
+				(
+					< VALUE >
+					{
+						result = new GetValueArgument(new LiteralArgument(ExecuteEnvironmentScope.RESULT_VALUE), LiteralArgument.NULL);
+					}
+				)
+			)
+		)
+	) 
 	{
-		value = LiteralArgument.NULL;	}
-	(		LOOKAHEAD(2)
-		< IF > < NULL > value = argument()
-	)?
-	{
-		return new GetValueArgument(key, value);
+		return result;
 	}
 }
 
@@ -505,18 +583,16 @@ Argument grepArgument() :
 
 Argument ifArgument() :
 {
-	Argument condition;
+	Argument condition, result;
+	Arguments ifArguments;
 }
 {
-	< IF > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET > 
+	< IF > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET >
 	{
-		final IfConditionBlock ifConditionBlock = new IfConditionBlock(condition);	}
-	block(ifConditionBlock)
-	(
-		< ELSE >
-		block(ifConditionBlock.getElseBlock())	)?
+		final IfConditionArgument ifConditionArgument = new IfConditionArgument(condition);	} 
+	block(ifConditionArgument.getBlock())
 	{
-		return ifConditionBlock;
+		return ifConditionArgument;
 	}
 }
 
@@ -631,6 +707,23 @@ Argument openArgument() :
 	}
 }
 
+Argument parseArgument() :
+{
+	Argument name, result;
+}
+{
+	< PARSE >
+	(
+		< CONFIG > < NAME > name = argument()
+		{
+			result = new ParseConfigArgument(name);
+		}
+	)
+	{
+		return result;
+	}
+}
+
 Argument pingArgument() :
 {
 	Argument id = LiteralArgument.NULL, result;
@@ -706,23 +799,9 @@ Argument showArgument() :
 	< SHOW >
 	(
 		(
-			< PROPERTY >
+			< ROUTER >
 			{
-				context = LiteralArgument.NULL;
-			}
-			(
-				LOOKAHEAD(2)
-				< KEY > key = argument()
-			)?
-			{
-				result = new ShowContextKeyArgument(null, key);
-			}
-		)
-		|
-		(
-			< MAPPER >
-			{
-				result = new ShowMapperArgument();
+				result = new ShowRouterArgument();
 			}
 		)
 		|
@@ -745,9 +824,10 @@ Argument whileArgument() :
 {
 	< WHILE > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET >
 	{
-		final WhileConditionBlock whileConditionBlock = new WhileConditionBlock(condition);	}
-	block(whileConditionBlock)
+//		final WhileConditionBlock whileConditionBlock = new WhileConditionBlock(condition);
+		final WhileConditionArgument whileConditionArgument = new WhileConditionArgument(condition);	}
+	block(whileConditionArgument.getBlock())
 	{
-		return whileConditionBlock;
+		return whileConditionArgument;
 	}
 }

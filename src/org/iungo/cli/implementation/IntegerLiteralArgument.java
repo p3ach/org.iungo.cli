@@ -1,5 +1,7 @@
 package org.iungo.cli.implementation;
 
+import org.iungo.cli.api.LiteralArgument;
+
 public class IntegerLiteralArgument extends LiteralArgument {
 
 	public IntegerLiteralArgument(final Integer value) {

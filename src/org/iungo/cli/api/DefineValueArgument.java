@@ -20,7 +20,7 @@ public class DefineValueArgument implements Argument {
 		this.key = key;
 		this.value = value;
 	}
-
+	
 	@Override
 	public Result execute(final ExecuteEnvironment executeEnvironment) {
 		try {
@@ -30,7 +30,7 @@ public class DefineValueArgument implements Argument {
 				result = value.execute(executeEnvironment);
 				if (result.isTrue()) {
 					final Object value = result.getValue();
-					executeEnvironment.getScopes().define(key, value);
+					executeEnvironment.getFames().peek().getScopes().define(key, value);
 				}
 			}
 			return result;

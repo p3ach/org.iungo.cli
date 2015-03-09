@@ -1,7 +1,5 @@
-package org.iungo.cli.implementation;
+package org.iungo.cli.api;
 
-import org.iungo.cli.api.Argument;
-import org.iungo.cli.api.ExecuteEnvironment;
 import org.iungo.cli.grammar.AbstractGrammar;
 import org.iungo.cli.grammar.GrammarConstants;
 import org.iungo.result.api.Result;
@@ -29,7 +27,7 @@ public class LiteralArgument implements Argument {
 
 	@Override
 	public String toString() {
-		return "literal";
+		return AbstractGrammar.getImageForConstant(GrammarConstants.LITERAL);
 	}
 
 }

@@ -38,7 +38,7 @@ public class GetValueArgument implements Argument {
 				 * Get the String key and try and get the value from the Scopes.
 				 */
 				final String key = result.getValue();
-				result = new Result(true, null, executeEnvironment.getScopes().get(key));
+				result = new Result(true, null, executeEnvironment.getFames().peek().getScopes().get(key));
 				if (result.isTrue() && result.getValue() == null) {
 					/*
 					 * We got a Null value for the key so execute the ifNull.

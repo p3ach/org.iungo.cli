@@ -13,6 +13,11 @@ public class SimpleSession implements Session {
 	private final ExecuteEnvironment executeEnvironment = new ExecuteEnvironment();
 	
 	private final Grammar grammar = new Grammar(new StringReader(""));
+
+	@Override
+	public ExecuteEnvironment getExecuteEnvironment() {
+		return executeEnvironment;
+	}
 	
 	@Override
 	public synchronized Result execute(final String text) {
@@ -26,10 +31,15 @@ public class SimpleSession implements Session {
 			final Unit unit = result.getValue();
 			final Method method = unit.getMethods().get(Method.MAIN_METHOD_NAME);
 			final AdhocMethod adhocMethod = new AdhocMethod(method);
-			return adhocMethod.execute(executeEnvironment);
+			return executeEnvironment.execute(adhocMethod);
 		} finally {
 			logger.end(String.format("execute(%s)", text));
 		}
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s []", SimpleSession.class.getName());
 	}
 
 }

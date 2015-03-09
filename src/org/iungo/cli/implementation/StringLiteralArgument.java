@@ -1,5 +1,7 @@
 package org.iungo.cli.implementation;
 
+import org.iungo.cli.api.LiteralArgument;
+
 public class StringLiteralArgument extends LiteralArgument {
 
 	public static final StringLiteralArgument EMPTY_STRING = new StringLiteralArgument("");

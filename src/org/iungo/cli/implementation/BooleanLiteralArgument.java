@@ -1,5 +1,7 @@
 package org.iungo.cli.implementation;
 
+import org.iungo.cli.api.LiteralArgument;
+
 public class BooleanLiteralArgument extends LiteralArgument {
 
 	public static final BooleanLiteralArgument FALSE = new BooleanLiteralArgument(false);

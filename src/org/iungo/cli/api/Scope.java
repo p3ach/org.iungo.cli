@@ -9,7 +9,7 @@ public interface Scope {
 
 	static final String ID_ROOT = Scope.class.getName();
 	
-	static final ID VALUES = new ID(ID_ROOT, null, "Values");
+	static final ID VALUES_ID = new ID(ID_ROOT, null, "Values");
 	
 	Block getBlock();
 

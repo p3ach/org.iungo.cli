@@ -10,13 +10,13 @@ import org.iungo.cli.api.Config;
 import org.iungo.cli.api.ConfigUtils;
 import org.iungo.cli.api.ExecuteEnvironment;
 import org.iungo.cli.api.Frames;
+import org.iungo.cli.api.SimpleCLI;
 import org.iungo.cli.api.SimpleMethod;
 import org.iungo.cli.api.MethodArguments;
 import org.iungo.cli.api.Scopes;
 import org.iungo.cli.api.Session;
 import org.iungo.cli.api.SimpleSession;
 import org.iungo.cli.api.Unit;
-import org.iungo.cli.implementation.SimpleCLI;
 import org.iungo.cli.implementation.StringLiteralArgument;
 import org.iungo.logger.api.ClassLogger;
 import org.iungo.logger.api.Logger;
@@ -59,7 +59,7 @@ public class TestCLI {
 		executeEnvironment.getUnits().add(unit);
 		logger.info(executeEnvironment.toString());
 
-		CallMethodArgument callMethodArgument = new CallMethodArgument(new StringLiteralArgument("hello world"), new StringLiteralArgument("while"), new MethodArguments());
+		CallMethodArgument callMethodArgument = new CallMethodArgument(new StringLiteralArgument("hello world"), new StringLiteralArgument("hello world"), new MethodArguments());
 		executeEnvironment.execute(callMethodArgument);
 		logger.info(executeEnvironment.toString());
 		

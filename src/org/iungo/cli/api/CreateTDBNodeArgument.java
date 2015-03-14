@@ -1,6 +1,7 @@
 package org.iungo.cli.api;
 
 import org.iungo.result.api.Result;
+import org.iungo.tdb.api.TDBNodeContext;
 
 public class CreateTDBNodeArgument extends CreateNodeArgument {
 
@@ -13,11 +14,18 @@ public class CreateTDBNodeArgument extends CreateNodeArgument {
 
 	@Override
 	public Result execute(final ExecuteEnvironment executeEnvironment) {
+		Result result = null;
 		try {
-			
-			return Result.TRUE;
+			result = executeEnvironment.execute(location);
+			if (result.isTrue()) {
+				final TDBNodeContext tdbNodeContext = new TDBNodeContext();
+				tdbNodeContext.putLocation((String) result.getValue());
+				result = new Result(true, null, tdbNodeContext);
+			}
+			return result;
 		} catch (final Exception exception) {
-			return Result.valueOf(exception);
+			result = Result.valueOf(exception);
+			return result;
 		}
 	}
 

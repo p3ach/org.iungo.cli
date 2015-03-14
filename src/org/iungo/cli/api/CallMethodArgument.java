@@ -54,11 +54,7 @@ public class CallMethodArgument implements Argument {
 			 * Call method block.
 			 */
 			final CallMethodBlock callMethodBlock = new CallMethodBlock(method, methodArguments);
-			
-			/*
-			 * Execute.
-			 */
-			result = callMethodBlock.execute(executeEnvironment);
+			result = executeEnvironment.execute(callMethodBlock);
 			
 			/*
 			 * Return.

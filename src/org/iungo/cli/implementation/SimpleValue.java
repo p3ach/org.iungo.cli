@@ -2,11 +2,11 @@ package org.iungo.cli.implementation;
 
 import org.iungo.cli.api.Value;
 
-public class DefaultValue implements Value {
+public class SimpleValue implements Value {
 
 	protected Object value = null;
 	
-	public DefaultValue(final Object value) {
+	public SimpleValue(final Object value) {
 		super();
 		this.value = value;
 	}
@@ -21,4 +21,8 @@ public class DefaultValue implements Value {
 		return value;
 	}
 
+	@Override
+	public String toString() {
+		return (value == null ? null : value.getClass().getName());
+	}
 }

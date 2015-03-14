@@ -31,6 +31,10 @@ public class Scopes {
 		return scopes.peek();
 	}
 	
+	public Boolean has(final String key) {
+		return (getScopeForValue(key) != null);
+	}
+	
 	public void define(final String key, final Object value) {
 		logger.debug(String.format("define(%s, %s)", key, (value == null ? null : value.getClass())));
 		peek().define(key, value);

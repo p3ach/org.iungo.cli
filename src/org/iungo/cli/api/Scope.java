@@ -19,6 +19,8 @@ public interface Scope {
 	
 	Result define(String key, Object value);
 	
+	Result undefine(String key);
+	
 	<T> T get(String key);
 	
 	<T> T set(String key, T value);

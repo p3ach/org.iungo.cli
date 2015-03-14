@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.iungo.cli.implementation.DefaultValue;
+import org.iungo.cli.implementation.SimpleValue;
 import org.iungo.logger.api.ClassLogger;
 import org.iungo.result.api.Result;
 
@@ -30,10 +30,19 @@ public abstract class AbstractScope implements Scope {
 		if (values.containsKey(key)) {
 			return Result.FALSE;
 		}
-		values.put(key, new DefaultValue(value));
+		values.put(key, new SimpleValue(value));
 		return Result.TRUE;
 	}
 
+	@Override
+	public Result undefine(final String key) {
+		if (!values.containsKey(key)) {
+			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
+		}
+		values.remove(key);
+		return Result.TRUE;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(final String key) {
@@ -49,7 +58,7 @@ public abstract class AbstractScope implements Scope {
 		if (!values.containsKey(key)) {
 			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
 		}
-		return (T) values.put(key, new DefaultValue(value));
+		return (T) values.put(key, new SimpleValue(value));
 	}
 
 	public String valuesToString() {
@@ -57,10 +66,10 @@ public abstract class AbstractScope implements Scope {
 		final Iterator<Entry<String, Value>> iterator = values.entrySet().iterator();
 		if (iterator.hasNext()) {
 			Entry<String, Value> entry = iterator.next();
-			result.append(String.format("%s [Class [%s]]", entry.getKey(), (entry.getValue() == null ? null : entry.getValue().getClass().toString())));
+			result.append(String.format("%s [%s]", entry.getKey(), entry.toString()));
 			while (iterator.hasNext()) {
 				entry = iterator.next();
-				result.append(String.format("\n%s [Class [%s]]", entry.getKey(), (entry.getValue() == null ? null : entry.getValue().getClass().toString())));
+				result.append(String.format("\n%s [Class [%s]]", entry.getKey(), entry.toString()));
 			}
 		}
 		return result.toString();
@@ -68,6 +77,6 @@ public abstract class AbstractScope implements Scope {
 	
 	@Override
 	public String toString() {
-		return String.format("%s [\nValues [\n%s\n]\n]", this.getClass().getName(), valuesToString());
+		return valuesToString();
 	}
 }

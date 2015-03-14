@@ -1,19 +1,31 @@
 package org.iungo.cli.api;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.iungo.common.api.ConcurrentLinkedList;
-import org.iungo.common.api.ConcurrentList;
 import org.iungo.result.api.Result;
 
-public class Arguments implements Argument {
+public class Arguments implements Argument, Iterable<Argument> {
 
-	private final ConcurrentList<Argument> arguments = new ConcurrentLinkedList<>();
+	private final List<Argument> arguments = new LinkedList<>();
 
 	public Boolean add(final Argument argument) {
 		return arguments.add(argument);
 	}
+	
+	public Boolean add(final Arguments arguments) {
+		Boolean result = true;
+		for (Argument argument : arguments) {
+			result = add(argument);
+			if (!result) {
+				break;
+			}
+		}
+		return result;
+	}
 
+	@Override
 	public Iterator<Argument> iterator() {
 		return arguments.iterator();
 	}

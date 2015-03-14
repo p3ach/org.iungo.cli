@@ -1,5 +1,7 @@
 package org.iungo.cli.api;
 
+import org.iungo.cli.grammar.AbstractGrammar;
+import org.iungo.cli.grammar.GrammarConstants;
 import org.iungo.result.api.Result;
 
 public class WhileConditionArgument extends ConditionArgument {
@@ -32,4 +34,8 @@ public class WhileConditionArgument extends ConditionArgument {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return String.format(String.format("%s (%s) {}", AbstractGrammar.getImageForConstant(GrammarConstants.WHILE), condition.toString()));
+	}
 }

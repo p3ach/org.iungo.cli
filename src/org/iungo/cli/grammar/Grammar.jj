@@ -401,7 +401,7 @@ Argument closeArgument() :
 	< CLOSE >
 	(
 		(
-			< NODE > id = argument()
+			< NODE > < ID > id = argument()
 			{
 				result = new CloseNodeArgument(id);
 			}
@@ -709,16 +709,25 @@ Argument openArgument() :
 
 Argument parseArgument() :
 {
-	Argument name, result;
+	Argument name, result, value;
 }
 {
 	< PARSE >
 	(
-		< CONFIG > < NAME > name = argument()
-		{
-			result = new ParseConfigArgument(name);
-		}
-	)
+		(
+			< CONFIG > < NAME > name = argument()
+			{
+				result = new ParseConfigArgument(name);
+			}
+		)
+		|
+		(
+			< TEXT > value = argument()
+			{
+				result = new ParseTextArgument(value);
+			}
+		)
+	)		
 	{
 		return result;
 	}
@@ -743,11 +752,12 @@ Argument pingArgument() :
 
 Argument returnArgument() :
 {
+	Argument value;
 }
 {
-	< RETURN >
+	< RETURN > value = argument()
 	{
-		return new ReturnArgument();
+		return new ReturnFlowControlArgument(value);
 	}
 }
 

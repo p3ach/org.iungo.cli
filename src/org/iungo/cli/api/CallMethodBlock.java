@@ -20,18 +20,26 @@ public class CallMethodBlock extends Block {
 	}
 
 	@Override
+	protected Scope createScope(ExecuteEnvironment executeEnvironment) {
+		return new CallMethodScope(executeEnvironment, method, methodArguments);
+	}
+
+	@Override
 	protected Scope pushScope(final ExecuteEnvironment executeEnvironment) {
-		final Scope scope = new CallMethodScope(executeEnvironment, method, methodArguments);
-		final Frame frame = new Frame();
-		executeEnvironment.getFames().push(frame);
-		frame.getScopes().push(scope);
-		return scope;
+		/*
+		 * Push a new Frame.
+		 */
+		pushFrame(executeEnvironment);
+		/*
+		 * Push a new CallMethodScope.
+		 */
+		return super.pushScope(executeEnvironment);
 	}
 	
 	@Override
 	protected void popScope(final ExecuteEnvironment executeEnvironment) {
-		executeEnvironment.getFames().peek().getScopes().pop();
-		executeEnvironment.getFames().pop();
+		super.popScope(executeEnvironment);
+		popFrame(executeEnvironment);
 	}
 
 	@Override

@@ -1,13 +1,8 @@
-package org.iungo.cli.implementation;
+package org.iungo.cli.api;
 
 import java.io.StringReader;
 
-import org.iungo.cli.api.CLI;
-import org.iungo.cli.api.Config;
 import org.iungo.cli.api.Configs;
-import org.iungo.cli.api.Configs;
-import org.iungo.cli.api.Unit;
-import org.iungo.cli.api.Units;
 import org.iungo.cli.grammar.Grammar;
 import org.iungo.result.api.Result;
 

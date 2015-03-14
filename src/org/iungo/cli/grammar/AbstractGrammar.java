@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.iungo.cli.api.Unit;
-import org.iungo.context.api.Context;
 import org.iungo.result.api.Result;
 
 
@@ -16,7 +15,11 @@ public abstract class AbstractGrammar {
 	 */
 
 	public static String getImageForConstant(final Integer constant) {
-		return GrammarConstants.tokenImage[constant];
+		String image = GrammarConstants.tokenImage[constant];
+		if (image.startsWith("\"")) {
+			image = image.substring(1, image.length() - 1);
+		}
+		return image;
 	}
 
 	/**
@@ -29,9 +32,9 @@ public abstract class AbstractGrammar {
 		final StringBuilder result = new StringBuilder(256);
 		final Iterator<Integer> iterator = Arrays.asList(constants).iterator();
 		if (iterator.hasNext()) {
-			result.append(GrammarConstants.tokenImage[iterator.next()]);
+			result.append(getImageForConstant(iterator.next()));
 			while (iterator.hasNext()) {
-				result.append(" " + GrammarConstants.tokenImage[iterator.next()]);
+				result.append(" " + getImageForConstant(iterator.next()));
 			}
 		}
 		return result.toString();

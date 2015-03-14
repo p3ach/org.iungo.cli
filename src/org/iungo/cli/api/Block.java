@@ -9,6 +9,20 @@ public class Block extends Arguments {
 
 	public static final String ROOT_NS = Block.class.getName();
 	
+	protected Frame createFrame(final ExecuteEnvironment executeEnvironment) {
+		return new Frame();
+	}
+	
+	protected Frame pushFrame(final ExecuteEnvironment executeEnvironment) {
+		final Frame frame = createFrame(executeEnvironment);
+		executeEnvironment.getFrames().push(frame);
+		return frame;
+	}
+	
+	protected void popFrame(final ExecuteEnvironment executeEnvironment) {
+		executeEnvironment.getFrames().pop();
+	}
+	
 	protected Scope createScope(final ExecuteEnvironment executeEnvironment) {
 		return new BlockScope(this);
 	}
@@ -20,7 +34,7 @@ public class Block extends Arguments {
 	 */
 	protected Scope pushScope(final ExecuteEnvironment executeEnvironment) {
 		final Scope scope = createScope(executeEnvironment);
-		executeEnvironment.getFames().peek().getScopes().push(scope);
+		executeEnvironment.getFrames().peek().getScopes().push(scope);
 		return scope;
 	}
 
@@ -29,7 +43,7 @@ public class Block extends Arguments {
 	 * @param executeEnvironment
 	 */
 	protected void popScope(final ExecuteEnvironment executeEnvironment) {
-		executeEnvironment.getFames().peek().getScopes().pop();
+		executeEnvironment.getFrames().peek().getScopes().pop();
 	}
 	
 	/**
@@ -46,10 +60,13 @@ public class Block extends Arguments {
 
 	/**
 	 * Execute this block by iterating and executing each Argument.
+	 * @return
+	 * AggregateResult
 	 */
 	@Override
-	public Result execute(final ExecuteEnvironment executeEnvironment) {
+	public AggregateResult execute(final ExecuteEnvironment executeEnvironment) {
 		pushScope(executeEnvironment);
+		AggregateResult aggregateResult = new AggregateResult();
 		try {
 			executeEnvironment.getFlowLifecycle().setNormal();
 			Integer index = 0;
@@ -59,17 +76,16 @@ public class Block extends Arguments {
 				Argument argument = iterator.next();
 				index++;
 				result.add(executeEnvironment.execute(argument));
-				if (result.isFalse()) {
-					executeEnvironment.getFlowLifecycle().setException();
-					return result;
+				if (executeEnvironment.getFlowLifecycle().isState(FlowLifecycle.NORMAL)) {
+					continue;
 				}
-				if (!executeEnvironment.getFlowLifecycle().isState(FlowLifecycle.NORMAL)) {
-					return result;
-				}
+				break;
 			}
 			return result;
 		} catch (final Exception exception) {
-			return Result.valueOf(exception);
+			executeEnvironment.getFlowLifecycle().setException();
+			aggregateResult.add(Result.valueOf(exception));
+			return aggregateResult;
 		} finally {
 			popScope(executeEnvironment);
 		}

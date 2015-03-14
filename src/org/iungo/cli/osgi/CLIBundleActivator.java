@@ -7,8 +7,8 @@ import org.iungo.cli.api.CallMethodArgument;
 import org.iungo.cli.api.Config;
 import org.iungo.cli.api.LiteralArgument;
 import org.iungo.cli.api.MethodArguments;
+import org.iungo.cli.api.SimpleCLI;
 import org.iungo.cli.api.SimpleMethod;
-import org.iungo.cli.implementation.SimpleCLI;
 import org.iungo.cli.implementation.DefaultValues;
 import org.iungo.context.api.Context;
 import org.iungo.context.api.ContextAPI;
@@ -34,16 +34,6 @@ public class CLIBundleActivator implements BundleActivator {
 	public void start(final BundleContext bundleContext) throws Exception {
 		this.bundleContext = bundleContext;
 		instance = this;
-		
-		final CLI cli = new SimpleCLI();
-		cli.openFromURL("hello-world", new URL("file:///home/dick/workspace/org.iungo.cli/src/org/iungo/cli/test/hello-world.config"));
-		final Config config = cli.get("hello-world");
-		final Context context = ((ContextAPI) getAPI(ContextAPI.class)).createContext();
-		Result result = config.compile(context);
-		System.out.println(result);
-
-		CallMethodArgument callMethodArgument = new CallMethodArgument(new LiteralArgument("hello world"), new LiteralArgument(SimpleMethod.MAIN_METHOD_NAME), new MethodArguments());
-		callMethodArgument.execute(context);
 	}
 
 	/*

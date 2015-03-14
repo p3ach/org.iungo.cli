@@ -32,22 +32,22 @@ public class GetValueArgument implements Argument {
 			/*
 			 * Execute the key.
 			 */
-			Result result = key.execute(executeEnvironment);
+			Result result = executeEnvironment.execute(key);
 			if (result.isTrue()) {
 				/*
 				 * Get the String key and try and get the value from the Scopes.
 				 */
 				final String key = result.getValue();
-				result = new Result(true, null, executeEnvironment.getFames().peek().getScopes().get(key));
+				result = new Result(true, null, executeEnvironment.getFrames().peek().getScopes().get(key));
 				if (result.isTrue() && result.getValue() == null) {
 					/*
 					 * We got a Null value for the key so execute the ifNull.
 					 */
-					result = ifNull.execute(executeEnvironment);
+					result = executeEnvironment.execute(ifNull);
 				}
 			}
 			/*
-			 * Return the result which is either False, or True with the non Null value or the ifNull value (which might be Null...).
+			 * Return the result which is either False, or True with the non Null value or the ifNull value (which might be Null... ;-)).
 			 */
 			return result;
 		} catch (final Exception exception) {

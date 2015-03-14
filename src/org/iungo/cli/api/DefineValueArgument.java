@@ -30,7 +30,7 @@ public class DefineValueArgument implements Argument {
 				result = value.execute(executeEnvironment);
 				if (result.isTrue()) {
 					final Object value = result.getValue();
-					executeEnvironment.getFames().peek().getScopes().define(key, value);
+					executeEnvironment.getFrames().peek().getScopes().define(key, value);
 				}
 			}
 			return result;

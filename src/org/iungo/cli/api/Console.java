@@ -1,7 +1,6 @@
 package org.iungo.cli.api;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.iungo.common.api.DaemonThreadFactory;
@@ -36,16 +35,18 @@ public class Console implements Runnable {
 		this.session = session;
 	}
 	
+	/**
+	 * We catch Throwable!
+	 * <p>As the Console may be the only way of getting the system closed cleanly we catch Throwable, log it as a warn and try to get more text input.
+	 */
 	@Override
 	public void run() {
 		while (true) {
 			try {
 				String text = in.readLine();
-				Result result = session.execute(text); 
-				logger.info(String.format("%s : %s", result.getState(), result.getText()));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.info(session.execute(text).toString());
+			} catch (final Throwable throwable) {
+				logger.warn(Result.valueOf(throwable).toString());;
 			}
 		}
 	}

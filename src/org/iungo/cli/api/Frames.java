@@ -4,44 +4,22 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.iungo.logger.api.ClassLogger;
-import org.iungo.logger.api.Loggers;
-
 public class Frames {
 
-	private static final ClassLogger logger = Loggers.create(Frames.class);
+//	private static final ClassLogger logger = new ClassLogger(Frames.class);
 	
-	private final Deque<Frame> frames = new LinkedList<>();
+	private final Deque<Frame> frames = new LinkedList<Frame>();
 	
 	public void push(final Frame frame) {
-		logger.begin(String.format("push(%s)", frame.toString()));
-		try {
-			frames.push(frame);
-		} finally {
-			logger.end(String.format("push(%s)=", frame.toString()));
-		}
+		frames.push(frame);
 	}
 	
 	public Frame pop() {
-		logger.begin("pop()");
-		Frame result = null;
-		try {
-			result = frames.pop();
-			return result;
-		} finally {
-			logger.end(String.format("pop()=%s", result.toString()));
-		}
+		return frames.pop();
 	}
 	
 	public Frame peek() {
-		logger.begin("peek()");
-		Frame result = null;
-		try {
-			result = frames.peek();
-			return result;
-		} finally {
-			logger.end(String.format("peek()=%s", result.toString()));
-		}
+		return frames.peek();
 	}
 
 	@Override

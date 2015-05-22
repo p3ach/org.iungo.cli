@@ -51,14 +51,16 @@ public abstract class AbstractGrammar {
 	
 	protected Integer methodCount = 0;
 	
-	protected Integer argumentCount = 0;
+	protected Integer wordCount = 0;
 	
-	public Result tryParse() {
+	public synchronized Result parse() {
+		Result result = null;
 		try {
-			final Unit unit = parse();
-			return new Result(true, String.format("Parsed [\nUnits [%d]\nMethods [%d]\nArguments [%d]\n]", unitCount, methodCount, argumentCount), unit);
-		} catch (final Exception exception) {
-			final String message = exception.getMessage();
+			final Unit unit = go();
+			result = new Result(true, String.format("Parsed [\nUnits [%d]\nMethods [%d]\nWords [%d]\n]", unitCount, methodCount, wordCount), unit);
+			return result;
+		} catch (final ParseException parseException) {
+			final String message = parseException.getMessage();
 			final Integer lineIndex = message.indexOf("line ");
 //			if (index != -1) {
 //				context.put(LINE_KEY, Integer.valueOf(message.substring(index + 5, message.indexOf(","))));
@@ -67,10 +69,24 @@ public abstract class AbstractGrammar {
 //			if (index != -1) {
 //				context.put(COLUMN_KEY, Integer.valueOf(message.substring(index + 7, message.indexOf("."))));
 //			}
-			return Result.valueOf(exception);
-	  } catch (final Error error) {
-			return Result.valueOf(error);
-	  }
+			result = new Result(false, parseException.getMessage(), null);
+			return result;
+		} catch (final TokenMgrError tokenMgrError) {
+			final String message = tokenMgrError.getMessage();
+			final Integer lineIndex = message.indexOf("line ");
+//			if (index != -1) {
+//				context.put(LINE_KEY, Integer.valueOf(message.substring(index + 5, message.indexOf(","))));
+//			}
+			final Integer columnIndex = message.indexOf("column ");
+//			if (index != -1) {
+//				context.put(COLUMN_KEY, Integer.valueOf(message.substring(index + 7, message.indexOf("."))));
+//			}
+			result = new Result(false, tokenMgrError.getMessage(), null);
+			return result;
+		} catch (final Exception exception) {
+			result = Result.valueOf(exception);
+			return result;
+		}
 	}
 	
 	protected String createUnitName() {
@@ -94,5 +110,5 @@ public abstract class AbstractGrammar {
 //		}
 	}
 	
-	public abstract Unit parse() throws ParseException;
+	public abstract Unit go() throws ParseException;
 }

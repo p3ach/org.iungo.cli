@@ -19,7 +19,7 @@ public class Configs implements Iterable<Entry<String, Config>> {
 	
 	public Result add(final Config config) {
 		if (configs.putIfAbsent(config.getName(), config) == null) {
-			return new Result(true, String.format("Added config [%s].",  config.getName()), config);
+			return new Result(true, String.format("Added config [%s].", config.toString()), config);
 		} else {
 			return new Result(false, String.format("Failed to add config [%s] to configs as name already exists.",  config.getName()), null);
 		}

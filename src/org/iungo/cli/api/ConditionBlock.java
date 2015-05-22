@@ -8,7 +8,7 @@ public class ConditionBlock extends Block {
 	}
 
 	@Override
-	protected Scope createScope(final ExecuteEnvironment executeEnvironment) {
+	protected Scope createScope(final Environment executeEnvironment) {
 		return new ConditionScope(this);
 	}
 }

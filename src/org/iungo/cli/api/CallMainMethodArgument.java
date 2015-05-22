@@ -1,10 +1,9 @@
 package org.iungo.cli.api;
 
-import org.iungo.cli.implementation.StringLiteralArgument;
 
-public class CallMainMethodArgument extends CallMethodArgument {
+public class CallMainMethodArgument extends CallMethodWord {
 	
-	public CallMainMethodArgument(final Argument unitName, final MethodArguments methodArguments) {
-		super(unitName, new StringLiteralArgument(SimpleMethod.MAIN_METHOD_NAME), methodArguments);
+	public CallMainMethodArgument(final Word unitName, final MethodWords methodArguments) {
+		super(unitName, new LiteralWord(SimpleMethod.MAIN_METHOD_NAME), methodArguments);
 	}
 }

@@ -4,13 +4,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import org.iungo.common.api.DaemonThreadFactory;
+import org.iungo.logger.api.ClassLogger;
 import org.iungo.logger.api.Logger;
-import org.iungo.logger.api.Loggers;
 import org.iungo.result.api.Result;
 
 public class Console implements Runnable {
 
-	private static final Logger logger = Loggers.create(Console.class.getName());
+	private static final Logger logger = new ClassLogger(Console.class);
 	
 	private static final Console instance = new Console();
 	
@@ -44,7 +44,7 @@ public class Console implements Runnable {
 		while (true) {
 			try {
 				String text = in.readLine();
-				logger.info(session.execute(text).toString());
+				logger.info(getSession().go(text).toString());
 			} catch (final Throwable throwable) {
 				logger.warn(Result.valueOf(throwable).toString());;
 			}

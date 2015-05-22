@@ -3,20 +3,20 @@ package org.iungo.cli.api;
 
 public class MethodParameter {
 	
-	private final Argument key;
+	private final Word key;
 	
-	private final Argument value;
+	private final Word value;
 	
-	public MethodParameter(final Argument key, final Argument value) {
+	public MethodParameter(final Word key, final Word value) {
 		this.key = key;
 		this.value = value;
 	}
 
-	public Argument getKey() {
+	public Word getKey() {
 		return key;
 	}
 
-	public Argument getValue() {
+	public Word getValue() {
 		return value;
 	}
 

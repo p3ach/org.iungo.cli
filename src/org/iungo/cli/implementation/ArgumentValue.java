@@ -1,13 +1,13 @@
 package org.iungo.cli.implementation;
 
-import org.iungo.cli.api.Argument;
+import org.iungo.cli.api.Word;
 import org.iungo.cli.api.Value;
 
 public class ArgumentValue implements Value {
 
-	protected final Argument value;
+	protected final Word value;
 	
-	public ArgumentValue(final Argument value) {
+	public ArgumentValue(final Word value) {
 		super();
 		this.value = value;
 	}

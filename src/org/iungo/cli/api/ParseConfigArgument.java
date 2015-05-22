@@ -2,16 +2,16 @@ package org.iungo.cli.api;
 
 import org.iungo.result.api.Result;
 
-public class ParseConfigArgument implements Argument {
+public class ParseConfigArgument implements Word {
 
-	private final Argument name;
+	private final Word name;
 
-	public ParseConfigArgument(final Argument name) {
+	public ParseConfigArgument(final Word name) {
 		this.name = name;
 	}
 
 	@Override
-	public Result execute(final ExecuteEnvironment executeEnvironment) {
+	public Result go(final Environment executeEnvironment) {
 		try {
 			Result result = executeEnvironment.execute(name);
 			if (result.isTrue()) {

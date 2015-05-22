@@ -4,7 +4,7 @@ import org.iungo.result.api.Result;
 
 public interface Session {
 
-	ExecuteEnvironment getExecuteEnvironment();
+	Environment getEnvironment();
 	
-	Result execute(String text);
+	Result go(String text);
 }

@@ -5,14 +5,14 @@ import java.net.URL;
 
 import org.iungo.cli.api.CLI;
 import org.iungo.cli.api.CallMainMethodArgument;
-import org.iungo.cli.api.CallMethodArgument;
+import org.iungo.cli.api.CallMethodWord;
 import org.iungo.cli.api.Config;
 import org.iungo.cli.api.ConfigUtils;
-import org.iungo.cli.api.ExecuteEnvironment;
+import org.iungo.cli.api.Environment;
 import org.iungo.cli.api.Frames;
 import org.iungo.cli.api.SimpleCLI;
 import org.iungo.cli.api.SimpleMethod;
-import org.iungo.cli.api.MethodArguments;
+import org.iungo.cli.api.MethodWords;
 import org.iungo.cli.api.Scopes;
 import org.iungo.cli.api.Session;
 import org.iungo.cli.api.SimpleSession;
@@ -26,7 +26,7 @@ import org.junit.Test;
 
 public class TestCLI {
 
-	private static final ClassLogger logger = Loggers.create(TestCLI.class);
+	private static final ClassLogger logger = Loggers.valueOf(TestCLI.class);
 	
 	@Test
 	public void test() throws MalformedURLException {
@@ -48,10 +48,10 @@ public class TestCLI {
 		cli.getConfigs().add(config);
 		cli.compile(config.getName());
 		
-		ExecuteEnvironment executeEnvironment = new ExecuteEnvironment();
+		Environment executeEnvironment = new Environment();
 		logger.info(executeEnvironment.toString());
 		
-		Loggers.getInstance().setLevel(ExecuteEnvironment.class.getName(), Logger.DEBUG);
+		Loggers.getInstance().setLevel(Environment.class.getName(), Logger.DEBUG);
 //		Loggers.getInstance().setLevel(SimpleMethod.class.getName(), Logger.DEBUG);
 //		Loggers.getInstance().setLevel(Frames.class.getName(), Logger.DEBUG);
 //		Loggers.getInstance().setLevel(Scopes.class.getName(), Logger.DEBUG);
@@ -59,7 +59,7 @@ public class TestCLI {
 		executeEnvironment.getUnits().add(unit);
 		logger.info(executeEnvironment.toString());
 
-		CallMethodArgument callMethodArgument = new CallMethodArgument(new StringLiteralArgument("hello world"), new StringLiteralArgument("hello world"), new MethodArguments());
+		CallMethodWord callMethodArgument = new CallMethodWord(new StringLiteralArgument("hello world"), new StringLiteralArgument("hello world"), new MethodWords());
 		executeEnvironment.execute(callMethodArgument);
 		logger.info(executeEnvironment.toString());
 		

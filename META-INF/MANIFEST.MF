@@ -11,13 +11,18 @@ Import-Package: org.iungo.common.api,
  org.iungo.context.api,
  org.iungo.exception.api,
  org.iungo.filter.api,
+ org.iungo.http.api,
+ org.iungo.http.jetty.api,
  org.iungo.id.api,
  org.iungo.lifecycle.api,
  org.iungo.logger.api,
  org.iungo.message.api,
+ org.iungo.node.api,
+ org.iungo.rdf.api,
  org.iungo.result.api,
  org.iungo.router.api,
  org.iungo.tdb.api,
+ org.iungo.util.concurrent.api,
  org.osgi.framework;version="1.3.0"
 Require-Bundle: org.junit
 Export-Package: org.iungo.cli.api

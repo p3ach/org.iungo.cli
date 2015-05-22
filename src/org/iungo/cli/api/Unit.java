@@ -1,6 +1,5 @@
 package org.iungo.cli.api;
 
-import org.iungo.cli.grammar.Grammar;
 import org.iungo.result.api.Result;
 
 public class Unit {
@@ -22,13 +21,13 @@ public class Unit {
 		return methods;
 	}
 
-	public Result execute(final String name, final ExecuteEnvironment executeEnvironment) {
+	public Result execute(final String name, final Environment environment) {
 		try {
 			final Method method = methods.get(name);
 			if (method == null) {
 				return new Result(false, String.format("Method [%s] not defined.", name), null);
 			} else {
-				return method.execute(executeEnvironment);
+				return method.go(environment);
 			}
 		} catch (final Exception exception) {
 			return Result.valueOf(exception);
@@ -37,6 +36,6 @@ public class Unit {
 
 	@Override
 	public String toString() {
-		return String.format("%s \"%s\"\n%s", Grammar.getImageForConstant(Grammar.UNIT), name, methods);
+		return String.format("Name [%s]\nMethods\n[%s]", name, methods);
 	}
 }

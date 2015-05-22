@@ -4,75 +4,84 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.iungo.logger.api.Logger;
-import org.iungo.logger.api.SimpleLogger;
+import org.iungo.result.api.Result;
 
-public class Scopes {
+/**
+ * 
+ * @author dick
+ *
+ */
+public class Scopes implements Values {
 
-	private static final Logger logger = new SimpleLogger(Scopes.class.getName());
+	protected final Deque<Scope> scopes;
 	
-	protected final Deque<Scope> scopes = new LinkedList<>();
-
-	public void push(final Scope scope) {
-		logger.debug(String.format("push(%s)", scope.getClass().getName()));
-		scopes.push(scope);
+	public Scopes() {
+		super();
+		scopes = new LinkedList<>();
 	}
 
+	public void push(final Scope scope) {
+		scopes.push(scope);
+	}
+	
 	public Scope pop() {
-		logger.debug("pop()");
-		try {
-			return scopes.pop();
-		} finally {
-		}
+		return scopes.pop();
 	}
 
 	public Scope peek() {
-		logger.debug("peek()");
 		return scopes.peek();
 	}
 	
-	public Boolean has(final String key) {
-		return (getScopeForValue(key) != null);
+	public Scope peekLast() {
+		return scopes.peekLast();
 	}
 	
-	public void define(final String key, final Object value) {
-		logger.debug(String.format("define(%s, %s)", key, (value == null ? null : value.getClass())));
-		peek().define(key, value);
-	}
-
-	public <T> T get(final String key) {
-		logger.debug(String.format("get(%s)", key));
-		final Scope scope = getScopeForValue(key);
-		if (scope == null) {
-			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
-		}
-		return scope.get(key);
-	}
-
-	public void set(final String key, final Object value) {
-		logger.debug(String.format("set(%s, %s)", key, (value == null ? null : value.getClass())));
-		final Scope scope = getScopeForValue(key);
-		if (scope == null) {
-			throw new UnsupportedOperationException(String.format("Value key [%s] not defined.", key));
-		}
-		scope.set(key, value);
-	}
-	
-	/**
-	 * Get the Scope for the given value key.
-	 * @param key
-	 * @return
-	 */
-	protected Scope getScopeForValue(final String key) {
-		logger.debug(String.format("getScopeForValue(%s)", key));
-		Iterator<Scope> iterator = scopes.descendingIterator();
+	@Override
+	public Result isDefined(final String key) {
+		final Iterator<Scope> iterator = scopes.descendingIterator();
 		while (iterator.hasNext()) {
-			Scope scope = iterator.next();
-			if (scope.has(key)) {
-				return scope;
+			final Scope scope = iterator.next();
+			final Result result = scope.getValues().isDefined(key);
+			if (result.isTrue()) {
+				return result;
 			}
 		}
-		return null;
+		return Result.FALSE;
+	}
+
+	@Override
+	public Result define(final String key, final Object value) {
+		return peek().getValues().define(key, value);
+	}
+
+	public Result global(final String key, final Object value) {
+		return peekLast().getValues().define(key, value);
+	}
+
+	@Override
+	public Result undefine(final String key) {
+		return peek().getValues().undefine(key);
+	}
+
+	@Override
+	public Result get(final String key) {
+		return isDefined(key);
+	}
+
+	/**
+	 * Set the given key/value pair.
+	 */
+	@Override
+	public Result set(final String key, final Object value) {
+		final Iterator<Scope> iterator = scopes.descendingIterator();
+		while (iterator.hasNext()) {
+			final Scope scope = iterator.next();
+			final Result result = scope.getValues().set(key, value);
+			if (result.isTrue()) {
+				return result;
+			}
+		}
+		return Result.FALSE;
 	}
 
 	@Override

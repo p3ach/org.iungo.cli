@@ -12,9 +12,9 @@ public class CallMethodScope extends BlockScope {
 
 	protected final Method method;
 	
-	protected final MethodArguments methodArguments;
+	protected final MethodWords methodArguments;
 	
-	public CallMethodScope(final ExecuteEnvironment executeEnvironment, final Method method, final MethodArguments methodArguments) {
+	public CallMethodScope(final Environment executeEnvironment, final Method method, final MethodWords methodArguments) {
 		super(null);
 		this.method = method;
 		this.methodArguments = methodArguments;
@@ -22,13 +22,13 @@ public class CallMethodScope extends BlockScope {
 		 * Define all the method parameters.
 		 */
 		for (MethodParameter methodParameter : method.getParameters()) {
-			define((String) methodParameter.getKey().execute(executeEnvironment).getValue(), methodParameter.getValue().execute(executeEnvironment).getValue());
+			getValues().define((String) methodParameter.getKey().go(executeEnvironment).getValue(), methodParameter.getValue().go(executeEnvironment).getValue());
 		}
 		/*
 		 * Set all the method arguments.
 		 */
-		for (MethodArgument methodArgument : methodArguments) {
-			set((String) methodArgument.getKey().execute(executeEnvironment).getValue(), methodArgument.getValue().execute(executeEnvironment).getValue());
+		for (MethodWord methodArgument : methodArguments) {
+			getValues().set((String) methodArgument.getKey().go(executeEnvironment).getValue(), methodArgument.getValue().go(executeEnvironment).getValue());
 		}
 	}
 

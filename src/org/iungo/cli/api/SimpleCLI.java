@@ -32,7 +32,7 @@ public class SimpleCLI implements CLI {
 		if (result.isFalse()) {
 			return result;
 		}
-		final Unit unit = result.getValue();
+		final Unit unit = (Unit) result.getValue();
 		units.add(unit);
 		return new Result(true, String.format("Compiled config [%s] and added unit [%s].", name, unit.getName()), unit);
 	}

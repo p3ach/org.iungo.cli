@@ -11,39 +11,33 @@ public class CallMethodBlock extends Block {
 
 	protected final Method method;
 	
-	protected final MethodArguments methodArguments;
+	protected final MethodWords methodArguments;
 	
-	public CallMethodBlock(final Method method, final MethodArguments methodArguments) {
+	public CallMethodBlock(final Method method, final MethodWords methodArguments) {
 		super();
 		this.method = method;
 		this.methodArguments = methodArguments;
 	}
 
 	@Override
-	protected Scope createScope(ExecuteEnvironment executeEnvironment) {
+	protected Scope createScope(Environment executeEnvironment) {
 		return new CallMethodScope(executeEnvironment, method, methodArguments);
 	}
 
 	@Override
-	protected Scope pushScope(final ExecuteEnvironment executeEnvironment) {
-		/*
-		 * Push a new Frame.
-		 */
+	protected Scope pushScope(final Environment executeEnvironment) {
 		pushFrame(executeEnvironment);
-		/*
-		 * Push a new CallMethodScope.
-		 */
 		return super.pushScope(executeEnvironment);
 	}
 	
 	@Override
-	protected void popScope(final ExecuteEnvironment executeEnvironment) {
+	protected void popScope(final Environment executeEnvironment) {
 		super.popScope(executeEnvironment);
 		popFrame(executeEnvironment);
 	}
 
 	@Override
-	protected Arguments getArguments() {
+	protected Words getWords() {
 		return method.getBlock();
 	}
 }

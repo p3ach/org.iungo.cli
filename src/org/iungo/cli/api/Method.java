@@ -1,7 +1,7 @@
 package org.iungo.cli.api;
 
 
-public interface Method extends Argument {
+public interface Method extends Word {
 
 	static final String MAIN_METHOD_NAME = "main";
 	

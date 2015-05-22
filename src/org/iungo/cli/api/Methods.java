@@ -23,9 +23,12 @@ public class Methods {
 	@Override
 	public String toString() {
 		final StringBuilder result = new StringBuilder(2048);
-		final Iterator<Method> iterator = methods.values().iterator();
-		while (iterator.hasNext()) {
-			result.append(String.format("\n%s", iterator.next().toString()));
+		final Iterator<String> iterator = methods.keySet().iterator();
+		if (iterator.hasNext()) {
+			result.append(String.format("%s", iterator.next()));
+			while (iterator.hasNext()) {
+				result.append(String.format("\n%s", iterator.next()));
+			}
 		}
 		return result.toString();
 	}

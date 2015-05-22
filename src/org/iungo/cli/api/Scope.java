@@ -1,11 +1,14 @@
 package org.iungo.cli.api;
 
-import java.util.Map;
-
 import org.iungo.id.api.ID;
-import org.iungo.result.api.Result;
 
 public interface Scope {
+	
+	final Integer ENVIRONMENT_VALUE = 2;
+	
+	final Integer FRAME_VALUE = 4;
+	
+	final Integer SCOPE_VALUE = 8;
 
 	static final String ID_ROOT = Scope.class.getName();
 	
@@ -13,15 +16,5 @@ public interface Scope {
 	
 	Block getBlock();
 
-	Map<String, Value> getValues();
-	
-	Boolean has(String key);
-	
-	Result define(String key, Object value);
-	
-	Result undefine(String key);
-	
-	<T> T get(String key);
-	
-	<T> T set(String key, T value);
+	Values getValues();
 }

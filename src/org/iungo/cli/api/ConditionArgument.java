@@ -1,12 +1,12 @@
 package org.iungo.cli.api;
 
-public abstract class ConditionArgument implements Argument {
+public abstract class ConditionArgument implements Word {
 
-	protected final Argument condition;
+	protected final Word condition;
 	
 	protected final ConditionBlock conditionBlock = new ConditionBlock();
 
-	public ConditionArgument(final Argument condition) {
+	public ConditionArgument(final Word condition) {
 		super();
 		this.condition = condition;
 	}

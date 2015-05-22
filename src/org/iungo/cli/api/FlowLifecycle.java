@@ -9,6 +9,8 @@ import org.iungo.lifecycle.api.AbstractLifecycle;
 
 public class FlowLifecycle extends AbstractLifecycle {
 	
+	public static final Integer CREATED = 2 << 1;
+	
 	public static final Integer NORMAL = 2 << 5;
 
 	public static final Integer EXCEPTION = 2 << 6;
@@ -48,6 +50,8 @@ public class FlowLifecycle extends AbstractLifecycle {
 		states = new StatesSet();
 		states.addAll(FLOW_STATES);
 		transitionMap.put(CONTINUE, states);
+		
+		state = CREATED;
 	}
 	
 	public void setNormal() {

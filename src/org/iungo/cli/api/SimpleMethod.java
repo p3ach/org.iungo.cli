@@ -42,10 +42,10 @@ public class SimpleMethod implements Method {
 	}
 
 	@Override
-	public Result execute(final ExecuteEnvironment executeEnvironment) {
+	public Result go(final Environment executeEnvironment) {
 		logger.debug(String.format("execute(%)", executeEnvironment));
 		try {
-			return getBlock().execute(executeEnvironment);
+			return getBlock().go(executeEnvironment);
 		} catch (final Exception exception) {
 			return Result.valueOf(exception);
 		} finally {

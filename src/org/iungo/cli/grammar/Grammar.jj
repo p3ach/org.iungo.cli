@@ -14,21 +14,22 @@ import java.util.*;
 
 import org.iungo.cli.api.*;
 import org.iungo.cli.implementation.*;
+import org.iungo.logger.api.*;
+
+import java.io.*;
 
 /*
 * JavaCC generates some {if (true) return ...;} statements which causes "unused" warnings when the generated class file is compiled...
 */
-@SuppressWarnings("unused")
+
 public class Grammar extends AbstractGrammar
 {
-	/*
-	* Class.
+	/**
+	* Convenience constructor as most of the time we new Grammar() then Grammar.reinit(InputStream).
 	*/
-
-	/*
-	* Instance.
-	*/
-
+	public Grammar()	{
+		this(new StringReader(""));
+	}
 }
 
 PARSER_END(Grammar)
@@ -43,11 +44,23 @@ SKIP :
 
 TOKEN :
 {
+  "/*" : IN_COMMENT
+}
+      
+// When any other character is seen in the IN_COMMENT state, skip it.
+< IN_COMMENT > SKIP : { < ~[] > }
+
+// When a */ is seen in the IN_COMMENT state, skip it and switch back to the DEFAULT state
+< IN_COMMENT > SKIP : { "*/" : DEFAULT }
+
+TOKEN :
+{
   < SEMI_COLON : ";" >
 | < ARGUMENTS : "arguments" >
 | < BOOLEAN : "boolean" >
 | < BREAK : "break" >
 | < CALL : "call" >
+| < CLASS : "class" >
 | < CLOSE : "close" >
 | < CONFIG : "config" >
 | < CONNECT : "connect" >
@@ -55,26 +68,43 @@ TOKEN :
 | < CONTEXT : "context" >
 | < CONTINUE : "continue" >
 | < CREATE : "create" >
+| < DATASET : "dataset" >
+| < DEBUG : "debug" >
 | < DEFINE : "define" >
 | < DISCONNECT : "disconnect" >
 | < ECHO : "echo" >
 | < ELSE : "else" >
+| < ENVIRONMENT : "environment" >
+| < ERROR : "error" >
 | < FALSE : "false" >
+| < FRAME : "frame" >
 | < FROM : "from" >
+| < FOR : "for" >
 | < GET : "get" >
+| < GLOBAL : "global" >
+| < GRAMMAR : "grammar" >
 | < GREP : "grep" >
+| < HAVING : "having" >
+| < HELP : "help" >
+| < HOST : "host" >
 | < HTTP : "http" >
 | < ID : "id" >
 | < IN : "in" >
 | < IF : "if" >
+| < INFO : "info" >
 | < INPUT : "input" >
 | < INTEGER : "integer" >
 | < IUNGO : "iungo" >
+| < JAVA : "java" >
+| < JETTY : "jetty" >
 | < KEY : "key" >
 | < LAST : "last" >
 | < LEVEL : "level" >
 | < LITERAL : "literal" >
+| < LOCATION : "location" >
 | < LOG : "log" >
+| < LOGGER : "logger" >
+| < LOGGERS : "loggers" >
 | < LONG : "long" >
 | < MAPPER : "mapper" >
 | < MEMORY : "memory" >
@@ -84,12 +114,18 @@ TOKEN :
 | < NODE : "node" >
 | < NOT : "not" >
 | < NULL : "null" >
+| < OBJECT : "object" >
+| < ON : "on" >
 | < OPEN : "open" >
 | < OPTIONS : "options" >
 | < PARAMETERS : "parameters" >
 | < PARSE : "parse" >
+| < PATH : "path" >
 | < PING : "ping" >
+| < PORT : "port" >
 | < PROPERTY : "property" >
+| < PROTOCOL : "protocol" >
+| < RDF : "rdf" >
 | < REGEX : "regex" >
 | < REQUEST : "request" >
 | < RESULT : "result" >
@@ -98,35 +134,36 @@ TOKEN :
 | < RUN : "run" >
 | < SHOW : "show" >
 | < SET : "set" >
+| < SPARQL : "sparql" >
+| < START : "start" >
 | < STATE : "state" >
+| < STATIC : "static" >
 | < STRING : "string" >
 | < SYSTEM : "system" >
 | < TDB : "tdb" >
 | < TEXT : "text" >
+| < TRACE : "trace" >
 | < TRUE : "true" >
 | < UNIT : "unit" >
 | < URL : "url" >
 | < VALUE : "value" >
+| < VALUES : "values" >
+| < WARN : "warn" >
 | < WHILE : "while" >
+| < WITH : "with" >
 | < BEGIN_BLOCK : "{" >
 | < END_BLOCK : "}" >
 | < LEFT_BRACKET : "(" >
 | < RIGHT_BRACKET : ")" >
 | < COMMA : "," >
+| < EQUAL : "=" >
 | < PERIOD : "." >
 | < DOUBLE_QUOTED_STRING : "\"" (~["\""])+ "\"" >
 | < #DIGIT : [ "0" - "9" ] >
 | < INTEGER_STRING : ( < DIGIT > )+ >
-| "/*": IN_COMMENT
 }
-      
-// When any other character is seen in the IN_COMMENT state, skip it.
-< IN_COMMENT > SKIP : { < ~[] > }
 
-// When a */ is seen in the IN_COMMENT state, skip it and switch back to the DEFAULT state
-< IN_COMMENT > SKIP : { "*/": DEFAULT }
-
-Unit parse() :
+Unit go() :
 {
 	Unit unit;
 	Method method;
@@ -190,22 +227,22 @@ Method method() :
 	< LEFT_BRACKET >
 	(
 		{
-			Argument key, value;		}
-		< KEY > key = argument()
-		{			value = LiteralArgument.NULL;
+			Word key, value;		}
+		< KEY > key = word()
+		{			value = LiteralWord.NULL;
 		}
 		(
-			< VALUE > value = argument()
+			< VALUE > value = word()
 		)?
 		{
 			method.getParameters().add(new MethodParameter(key, value));		}
 		(
-			< COMMA > < KEY > key = argument()
+			< COMMA > < KEY > key = word()
 			{
-				value = LiteralArgument.NULL;
+				value = LiteralWord.NULL;
 			}
 			(
-				< VALUE > value = argument()
+				< VALUE > value = word()
 			)?
 			{
 				method.getParameters().add(new MethodParameter(key, value));
@@ -220,11 +257,11 @@ Method method() :
 }
 
 Block block(final Block block) :
-{	Argument argument;
+{	Word argument;
 }
 {	< BEGIN_BLOCK >
 	(
-		argument = argument()
+		argument = word()
 		{
 			block.add(argument);
 		}
@@ -234,176 +271,251 @@ Block block(final Block block) :
 		return new Block();	}
 }
 
-Argument argument() :
+Words arguments() :
 {
-	Argument argument = null;
+	Word argument;
+	Words arguments = new Words();}
+{
+	< LEFT_BRACKET >
+	(
+		argument = word()
+		{
+			arguments.add(argument);		}
+		(
+			< COMMA > argument = word()			{
+				arguments.add(argument);
+			}
+		)*	)?
+	< RIGHT_BRACKET >
+	{
+		return arguments;	}}
+
+/**
+* Return an argument.
+*/
+Word word() :
+{
+	Word word = null;
 	Token token;
 }
 {
 	(
 		(
-			argument = breakArgument()
+			word = breakWord()
 		)
 		| 
 		(
-			argument = callArgument()
+			word = callWord()
 		)
 		| 
 		(
-			argument = closeArgument()
+			word = contextWord()
 		)
 		| 
 		(
-			argument = connectArgument()
+			word = closeWord()
 		)
 		| 
 		(
-			argument = continueArgument()
+			word = connectWord()
 		)
 		| 
 		(
-			argument = createArgument()
+			word = continueWord()
 		)
 		| 
 		(
-			argument = defineArgument()
+			word = createWord()
 		)
 		| 
 		(
-			argument = disconnectArgument()
+			word = defineWord()
 		)
 		| 
 		(
-			argument = echoArgument()
+			word = disconnectWord()
 		)
 		| 
 		(
-			argument = getArgument()
+			word = echoWord()
 		)
 		| 
 		(
-			argument = grepArgument()
+			word = getWord()
 		)
 		| 
 		(
-			argument = ifArgument()
+			word = grepWord()
 		)
 		| 
 		(
-			argument = literalArgument()
+			word = helpWord()
 		)
 		| 
 		(
-			argument = logArgument()
+			word = ifWord()
 		)
 		| 
 		(
-			argument = newArgument()
+			word = literalWord()
 		)
 		| 
 		(
-			argument = notArgument()
+			word = logWord()
 		)
 		| 
 		(
-			argument = openArgument()
+			word = newWord()
 		)
 		| 
 		(
-			argument = parseArgument()
+			word = nodeWord()
 		)
 		| 
 		(
-			argument = pingArgument()
+			word = notWord()
 		)
 		| 
 		(
-			argument = returnArgument()
+			word = openWord()
 		)
 		| 
 		(
-			argument = runArgument()
+			word = parseWord()
 		)
 		| 
 		(
-			argument = setArgument()
+			word = pingWord()
 		)
 		| 
 		(
-			argument = showArgument()
+			word = returnWord()
 		)
 		| 
 		(
-			argument = whileArgument()
+			word = runWord()
 		)
-		/*		* The following are LiteralArgument shortcuts.		*/		| 		(			token = < DOUBLE_QUOTED_STRING >			{				argument = new StringLiteralArgument(removeDoubleQuotes(token));			}		)		| 		(			(				< FALSE >				{					argument = BooleanLiteralArgument.FALSE;				}			)			|			(				< TRUE >				{					argument = BooleanLiteralArgument.TRUE;				}			)		)		|		(			< NULL >			{				argument = LiteralArgument.NULL;			}		)		|		(			token = < INTEGER_STRING >			{				argument = new IntegerLiteralArgument(Integer.valueOf(token.image));			}		)
+		| 
+		(
+			word = setWord()
+		)
+		| 
+		(
+			word = showWord()
+		)
+		| 
+		(
+			word = startWord()
+		)
+		| 
+		(
+			word = valuesWord()
+		)
+		| 
+		(
+			word = whileWord()
+		)
+		/*		* The following are LiteralWord shortcuts.		*/		| 		(			token = < DOUBLE_QUOTED_STRING >			{				word = new LiteralWord.StringLiteralWord(removeDoubleQuotes(token));			}		)		| 		(			(				< FALSE >				{					word = LiteralWord.BooleanLiteralWord.FALSE;				}			)			|			(				< TRUE >				{					word = LiteralWord.BooleanLiteralWord.TRUE;				}			)		)		|		(			< NULL >			{				word = LiteralWord.NULL;			}		)		|		(			token = < INTEGER_STRING >			{				word = new LiteralWord.IntegerLiteralWord(Integer.valueOf(token.image));			}		)
 	)
 	{
-		argumentCount++;
-		return argument;	}
+		wordCount++;
+		return word;	}
 }
 
-Argument breakArgument() :
+Word breakWord() :
 {}
 {
 	< BREAK >
-	{		return new BreakFlowControlArgument();
+	{		return new BreakFlowControlWord();
 	}}
 
-Argument callArgument() :
+Word callWord() :
 {
-	Argument unitName, methodName;
+	Word unitName, methodName;
+	Word method, on;
+	Words with;
+	Word result;
 }
 {
 	< CALL >
-	(		< UNIT > unitName = argument()
-		< METHOD > methodName = argument()
-		{
-			MethodArguments arguments = new MethodArguments();
-		}
-		< ARGUMENTS >
-		{
-			Argument key, value;		}
-		< LEFT_BRACKET >
-		(
-			< KEY > key = argument()
+	(
+		(			< UNIT > unitName = word()
+			< METHOD > methodName = word()
 			{
-				value = LiteralArgument.NULL;			}
-			(
-				< VALUE > value = argument()			)?
-			{
-				arguments.add(new MethodArgument(key, value));
+				MethodWords arguments = new MethodWords();
 			}
+			< ARGUMENTS >
+			{
+				Word key, value;			}
+			< LEFT_BRACKET >
 			(
-				< COMMA > < KEY > key = argument()
+				< KEY > key = word()
 				{
-					value = LiteralArgument.NULL;
+					value = LiteralWord.NULL;				}
+				(
+					< VALUE > value = word()				)?
+				{
+					arguments.add(new MethodWord(key, value));
 				}
 				(
-					< VALUE > value = argument()
+					< COMMA > < KEY > key = word()
+					{
+						value = LiteralWord.NULL;
+					}
+					(
+						< VALUE > value = word()
+					)?
+					{
+						arguments.add(new MethodWord(key, value));
+					}
 				)?
+			)*
+			< RIGHT_BRACKET >
+			{
+				result = new CallMethodWord(unitName, methodName, arguments);
+			}
+		)
+		|
+		(
+			< JAVA >
+			{
+				Boolean isStatic = false;			}
+			(
+				< STATIC >
 				{
-					arguments.add(new MethodArgument(key, value));
-				}
+					isStatic = true;				}			)?
+			< METHOD >
+			{
+				Word m, o;
+				Words p = Words.EMPTY, a = Words.EMPTY;			}
+			m = word()
+			(
+				LOOKAHEAD(2)
+				< HAVING > < PARAMETERS > p = arguments()			)?
+			< ON >
+			o = word()
+			(
+				LOOKAHEAD(2)				< WITH > < ARGUMENTS > a = arguments()
 			)?
-		)*
-		< RIGHT_BRACKET >
+			{
+				result = (isStatic ? new CallJavaStaticMethodWord(m, p, o, a) : new CallJavaMethodWord(m, p, o, a));			}		)
 	)
 	{
-		return new CallMethodArgument(unitName, methodName, arguments);	}
+		return result;
+	}
 }
 
-Argument closeArgument() :
+Word closeWord() :
 {
-	Argument id, iungo, result;
+	Word id, iungo, result;
 }
 {
 	< CLOSE >
 	(
 		(
-			< NODE > < ID > id = argument()
+			< NODE > < ID > id = word()
 			{
-				result = new CloseNodeArgument(id);
+				result = new CloseNodeWord(id);
 			}
 		)
 	)
@@ -412,81 +524,135 @@ Argument closeArgument() :
 	}
 }
 
-Argument connectArgument() :
+Word connectWord() :
 {
-	Argument iungo, result;
+	Word iungo, result;
 }
 {
 	< CONNECT >
 	(
-		< IUNGO > iungo = argument()
+		< IUNGO > iungo = word()
 		{
-			result = new ConnectIungoArgument(iungo);		}	)
+			result = new ConnectIungoWord(iungo);		}	)
 	{
 		return result;
 	}
 }
 
-Argument continueArgument() :
+Word contextWord() :
+{}
+{
+	< CONTEXT >
+	{
+		return new SimpleContextWord(keyValueWords());	}}
+
+Word continueWord() :
 {
 }
 {
 	< CONTINUE >
 	{
-		return new ContinueFlowControlArgument();
+		return new ContinueFlowControlWord();
 	}
 }
 
-Argument createArgument() :
+Word createWord() :
 {
-	Argument result;
+	Word result;
 }
 {
 	< CREATE >
-	(
-		< TDB > < NODE >
-		(
-			< IN > < MEMORY >
+	(		(
+			< JETTY > < HTTP > < NODE > < WITH > < NODE > < CONTEXT >
 			{
-				result = new CreateTDBNodeArgument(LiteralArgument.NULL);			}		)	)
+				result = new CreateJettyHTTPNodeWord(new NodeContextWord(keyValueWords()));
+			}
+		)
+		|
+		(
+			< SPARQL > < PROTOCOL > < NODE > < WITH > < NODE > < CONTEXT >
+			{
+				result = new CreateSPARQLProtocolNodeWord(new NodeContextWord(keyValueWords()));
+			}
+		)
+		|
+		(
+			< TDB > < NODE > < WITH > < NODE > < CONTEXT >
+			{
+				result = new CreateTDBNodeWord(new NodeContextWord(keyValueWords()));
+			}
+		)
+		|
+		(
+			< JAVA > < OBJECT >
+			{
+				Word o;
+				Words p = Words.EMPTY, a = Words.EMPTY;
+			}
+			o = word()
+			(
+				LOOKAHEAD(2)
+				< HAVING > < PARAMETERS > p = arguments()
+			)?
+			(
+				LOOKAHEAD(2)
+				< WITH > < ARGUMENTS > a = arguments()
+			)?
+			{
+				result = new CreateJavaObjectWord(o, p, a);			}		)
+	)
 	{
 		return result;
 	}
 }
 
-Argument defineArgument() :
+Word defineWord() :
 {
-	Argument key, value;
-	Argument result;
+	Word key, value;
 }
 {
 	< DEFINE >
-//	(
-		< KEY > key = argument()
-		{
-			value = LiteralArgument.NULL;		}
-		(
-			LOOKAHEAD(2)
-			< VALUE > value = argument()		)?
-		{
-			result = new DefineValueArgument(key, value);
-		}
-//	)
 	{
-		return result;
+		Integer scope = Scope.SCOPE_VALUE;	}
+	(
+		(			< ENVIRONMENT >
+			{
+				scope = Scope.ENVIRONMENT_VALUE;			}
+		)
+		|
+		(
+			< FRAME >
+			{
+				scope = Scope.FRAME_VALUE;
+			}
+		)
+	)?
+	< KEY > key = word()
+	{
+		value = LiteralWord.NULL;	}
+	(
+		LOOKAHEAD(2)
+		< VALUE > value = word()
+	)?
+	{
+		if (scope.equals(Scope.ENVIRONMENT_VALUE)) {
+			return new DefineEnvironmentValueWord(key, value);
+		} else if (scope.equals(Scope.FRAME_VALUE)) {			return new DefineFrameValueWord(key, value);
+		} else {			return new DefineScopeValueWord(key, value);
+		}
 	}
 }
 
-Argument disconnectArgument() :
+Word disconnectWord() :
 {
-	Argument iungo, result;
+	Word iungo, result;
 }
 {
 	< DISCONNECT >
 	(
 		< IUNGO >
 		{
-			result = new DisconnectIungoArgument();
+			result = new DisconnectIungoWord();
 		}
 	)
 	{
@@ -494,16 +660,16 @@ Argument disconnectArgument() :
 	}
 }
 
-Argument echoArgument() :
+Word echoWord() :
 {
-	Argument id, result;
+	Word id, result;
 }
 {
 	< ECHO >
 	(
-		< REQUEST > < NODE > < ID > id = argument()
+		< REQUEST > < NODE > < ID > id = word()
 		{
-			result = new NodeEchoRequestArgument(id);
+			result = new NodeEchoRequestWord(id);
 		}
 	)
 	{
@@ -511,92 +677,94 @@ Argument echoArgument() :
 	}
 }
 
-Argument getArgument() :
+Word getWord() :
 {
-	Argument context, key, value, result;
+	Word context, key, value, result;
 }
 {
 	< GET >
 	(
 		(
-			< KEY > key = argument()
+			< KEY > key = word()
 			{
-				value = LiteralArgument.NULL;			}
-			(				LOOKAHEAD(2)
-				< IF > < NULL > value = argument()
-			)?
-			{
-				result = new GetValueArgument(key, value);
+				result = new GetValueWord(key);
 			}
 		)
 		|
 		(
-			< LAST > < RESULT >
-			(
-				(
-					< STATE >					{
-						result = new GetValueArgument(new LiteralArgument(ExecuteEnvironmentScope.RESULT_STATE), LiteralArgument.NULL);
-					}
-				)
-				|				(
-					< TEXT >
-					{
-						result = new GetValueArgument(new LiteralArgument(ExecuteEnvironmentScope.RESULT_TEXT), LiteralArgument.NULL);
-					}
-				)
-				|
-				(
-					< VALUE >
-					{
-						result = new GetValueArgument(new LiteralArgument(ExecuteEnvironmentScope.RESULT_VALUE), LiteralArgument.NULL);
-					}
-				)
-			)
-		)
+			< JAVA >
+			< CLASS >
+			{
+				Word c;			}
+			c = word()
+			{
+				result = new GetJavaClassWord(c);			}		) 
 	) 
 	{
 		return result;
 	}
 }
 
-Argument grepArgument() :
+Word helpWord() :
 {
-	Arguments options = new Arguments();
-	Argument option, regex, input;
+	Word result;
+}
+{
+	< HELP > < GET > < GRAMMAR > < FOR >
+	(		(			< CLASS >
+			{
+				result = new GrammarForClassWord(word());
+			}
+		)
+		|
+		(
+			< OBJECT >
+			{
+				result = new GrammarForObjectWord(word());
+			}
+		)
+	)
+	{
+		return result;	}}
+
+Word grepWord() :
+{
+	Words options = new Words();
+	Word option, regex, input;
 }
 {
 	< GREP >
 	(		< OPTIONS >
 		< LEFT_BRACKET >
-		(			option = argument()
+		(			option = word()
 			(
-				< COMMA > option = argument()			)*
+				< COMMA > option = word()			)*
 		)?
 		< RIGHT_BRACKET >
 	)?
-	< REGEX > regex = argument()
-	< INPUT > input = argument()
+	< REGEX > regex = word()
+	< INPUT > input = word()
 	{
-		return new GREPArgument(options, regex, input);
+		return new GREPWord(options, regex, input);
 	}
 }
 
-Argument ifArgument() :
+Word ifWord() :
 {
-	Argument condition, result;
-	Arguments ifArguments;
+	Word condition, result;
+	Words ifWords;
 }
 {
-	< IF > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET >
+	< IF > < LEFT_BRACKET > condition = word() < RIGHT_BRACKET >
 	{
-		final IfConditionArgument ifConditionArgument = new IfConditionArgument(condition);	} 
-	block(ifConditionArgument.getBlock())
+		final IfConditionWord ifConditionWord = new IfConditionWord(condition);	} 
+	block(ifConditionWord.getBlock())
 	{
-		return ifConditionArgument;
+		return ifConditionWord;
 	}
 }
 
-Argument literalArgument() :
+Word literalWord() :
 {
 	Token value;
 }
@@ -608,12 +776,12 @@ Argument literalArgument() :
 			(
 				< FALSE >
 				{
-					return BooleanLiteralArgument.FALSE;				}
+					return LiteralWord.BooleanLiteralWord.FALSE;				}
 			)
 			|			(
 				< TRUE >
 				{
-					return BooleanLiteralArgument.TRUE;
+					return LiteralWord.BooleanLiteralWord.TRUE;
 				}
 			)
 		)
@@ -621,85 +789,76 @@ Argument literalArgument() :
 		(
 			< INTEGER > value = < INTEGER_STRING >
 			{
-				return new IntegerLiteralArgument(Integer.valueOf(value));
+				return new LiteralWord.IntegerLiteralWord(Integer.valueOf(value.image));
 			}
 		)
 		|
 		(
 			< LONG > value = < INTEGER_STRING >
 			{
-				return new LongLiteralArgument(Integer.valueOf(value));
+				return new LiteralWord.LongLiteralWord(Long.valueOf(value.image));
 			}
 		)
 		|
 		(
 			< NULL >
 			{
-				return LiteralArgument.NULL;
+				return LiteralWord.NULL;
 			}
 		)
 		|
 		(
 			< STRING > value = < DOUBLE_QUOTED_STRING >
 			{
-				return new StringLiteralArgument(removeDoubleQuotes(value));			}
+				return new LiteralWord.StringLiteralWord(removeDoubleQuotes(value));			}
 		)
 	)
 }
 
-Argument logArgument() :
+Word logWord() :
 {
-	Argument level, text;
+	Word level, text;
 }
 {
-	< LOG > ( <  LEVEL > )? level = argument() ( < TEXT > )? text = argument()
+	< LOG > ( <  LEVEL > )? level = word() ( < TEXT > )? text = word()
 	{
-		return new LogArgument(level, text);
+		return new LogWord(level, text);
 	}
 }
 
-Argument newArgument() :
+Word newWord() :
 {
-	Argument result;
+	Word result;
 }
 {
 	< NEW >
 	(
 		(  			< HTTP >
   			{
-				result = new NewHTTPNodeArgument(LiteralArgument.NULL, new LiteralArgument(8080), new LiteralArgument("/"));   			}
+				result = new NewHTTPNodeWord(LiteralWord.NULL, new LiteralWord(8080), new LiteralWord("/"));   			}
   		)
   		|
   		(			< IUNGO >
 			{
-				result = new NewIungoArgument();			}
+				result = new NewIungoWord();			}
 		)	)
 	{
 		return result;
 	}
 }
 
-Argument notArgument() :
+/**
+* Handle Node words.
+*/
+Word nodeWord() :
 {
-	Argument argument;
+	Word result;
 }
 {
-	< NOT > argument = argument()
-	{
-		return new NotArgument(argument);
-	}
-}
-
-Argument openArgument() :
-{
-	Argument name, url, result;
-}
-{
-	< OPEN >
+	< NODE >
 	(
-		< CONFIG > < NAME > name = argument() < FROM > < URL > url = argument()
-		{
-			result = new OpenConfigFromURLArgument(name, url);
+		< CONTEXT >
+		{			result = new NodeContextWord(keyValueWords());
 		}
 	)
 	{
@@ -707,24 +866,52 @@ Argument openArgument() :
 	}
 }
 
-Argument parseArgument() :
+Word notWord() :
 {
-	Argument name, result, value;
+	Word argument;
+}
+{
+	< NOT > argument = word()
+	{
+		return new NotWord(argument);
+	}
+}
+
+Word openWord() :
+{
+	Word name, url, result;
+}
+{
+	< OPEN >
+	(
+		< CONFIG > < NAME > name = word() < FROM > < URL > url = word()
+		{
+			result = new OpenConfigFromURLWord(name, url);
+		}
+	)
+	{
+		return result;
+	}
+}
+
+Word parseWord() :
+{
+	Word name, result, value;
 }
 {
 	< PARSE >
 	(
 		(
-			< CONFIG > < NAME > name = argument()
+			< CONFIG > < NAME > name = word()
 			{
-				result = new ParseConfigArgument(name);
+				result = new ParseConfigWord(name);
 			}
 		)
 		|
 		(
-			< TEXT > value = argument()
+			< TEXT > value = word()
 			{
-				result = new ParseTextArgument(value);
+				result = new ParseTextWord(value);
 			}
 		)
 	)		
@@ -733,16 +920,16 @@ Argument parseArgument() :
 	}
 }
 
-Argument pingArgument() :
+Word pingWord() :
 {
-	Argument id = LiteralArgument.NULL, result;
+	Word id = LiteralWord.NULL, result;
 }
 {
 	< PING >
 	(
-		< ID > id = argument()
+		< ID > id = word()
 		{
-			result = new EchoRequestArgument(id);
+			result = new EchoRequestWord(id);
 		}
 	)
 	{
@@ -750,35 +937,35 @@ Argument pingArgument() :
 	}
 }
 
-Argument returnArgument() :
+Word returnWord() :
 {
-	Argument value;
+	Word value;
 }
 {
-	< RETURN > value = argument()
+	< RETURN > value = word()
 	{
-		return new ReturnFlowControlArgument(value);
+		return new ReturnFlowControlWord(value);
 	}
 }
 
-Argument runArgument() :
+Word runWord() :
 {
-	Argument id, node, result;
+	Word id, node, result;
 }
 {
 	< RUN >
 	(
 		(
 			< CONFIG >
-			(				< ID > id = argument()
+			(				< ID > id = word()
 				{
-					result = new RunConfigArgument(id);				}
+					result = new RunConfigWord(id);				}
 			)
 		)
 		|
-		(			< NODE > node = argument()
+		(			< NODE > node = word()
 			{
-				result = new RunNodeArgument(node);
+				result = new RunNodeWord(node);
 			}
 		)
 	)
@@ -787,38 +974,108 @@ Argument runArgument() :
 	}
 }
 
-Argument setArgument() :
+Word setWord() :
 {
-	Argument context, key, value;
+	Word key, name, result, value;
 }
 {
 	< SET >
-//	< PROPERTY >//	{//		context = LiteralArgument.NULL;//	}//	(//		< CONTEXT > context = argument()//	)?
-	< KEY > key = argument() < VALUE > value = argument()
+	(		(			< KEY > key = word() < VALUE > value = word()
+		{
+			result = new SetValueWord(key, value);
+		}
+		)
+		| 
+		(
+			< LOGGER > < NAME > name = word() < LEVEL >
+			(
+				(					< DEBUG >
+					{
+						value = new LiteralWord(Logger.DEBUG);					}
+				)
+				|
+				(
+					< ERROR >
+					{
+						value = new LiteralWord(Logger.ERROR);
+					}
+				)
+				|
+				(
+					< INFO >
+					{
+						value = new LiteralWord(Logger.INFO);
+					}
+				)
+				|
+				(
+					< TRACE >
+					{
+						value = new LiteralWord(Logger.TRACE);
+					}
+				)
+				|
+				(
+					< WARN >
+					{
+						value = new LiteralWord(Logger.WARN);
+					}
+				)
+				|
+				( 					value = word()
+				)
+			)
+		{
+			result = new SetLoggerLevelWord(name, value);
+		}
+		)
+	)
 	{
-		return new SetValueArgument(key, value);
+		return result;
 	}
 }
 
-Argument showArgument() :
+Word showWord() :
 {
-	Argument context, key = LiteralArgument.NULL, value;
-	Argument result;
+	Word result;
 }
 {
 	< SHOW >
 	(
 		(
+			< LOGGERS >
+			{
+				result = new ShowLoggersWord();
+			}
+		)
+		|
+		(
+			{
+				Word id;			}
+			< NODE > < ID > id = word()
+			{
+				result = new ShowNodeWord(id);
+			}
+		)
+		|
+		(
 			< ROUTER >
 			{
-				result = new ShowRouterArgument();
+				result = new ShowRouterWord();
 			}
 		)
 		|
 		(
 			< SYSTEM >
 			{
-				result = new ShowSystemArgument();
+				result = new ShowSystemWord();
+			}
+		)
+		|
+		(
+			< VALUES >
+			{
+				result = new ShowValuesWord();
 			}
 		)
 	)
@@ -827,17 +1084,80 @@ Argument showArgument() :
 	}
 }
 
-Argument whileArgument() :
+Word startWord() :
 {
-	Argument condition, argument;
+	Word id, iungo, result;
 }
 {
-	< WHILE > < LEFT_BRACKET > condition = argument() < RIGHT_BRACKET >
+	< START >
+	(
+		(
+			< NODE > < ID > id = word()
+			{
+				result = new StartNodeWord(id);
+			}
+		)
+	)
+	{
+		return result;
+	}
+}
+
+KeyValueWord keyValueWord() :
+{	Word key, value = LiteralWord.NULL;
+}
+{
+	< KEY > key = word()
+	(
+		< VALUE > value = word()
+	)?
+	{
+		return new KeyValueWord(key, value);	}
+}
+
+KeyValueWords keyValueWords() :
+{
+	KeyValueWords result = new KeyValueWords();
+	KeyValueWord keyValueWord;
+}
+{
+	< LEFT_BRACKET >
+	(
+		keyValueWord = keyValueWord()
+		{
+			result.add(keyValueWord);
+		}
+		(
+			< COMMA > keyValueWord = keyValueWord()
+			{
+				result.add(keyValueWord);
+			}
+		)*
+	)?
+	< RIGHT_BRACKET >
+	{
+		return result;
+	}
+}
+
+KeyValueWords valuesWord() :
+{}
+{
+	< VALUES >
+	{
+		return keyValueWords();	}}
+
+Word whileWord() :
+{
+	Word condition, argument;
+}
+{
+	< WHILE > < LEFT_BRACKET > condition = word() < RIGHT_BRACKET >
 	{
 //		final WhileConditionBlock whileConditionBlock = new WhileConditionBlock(condition);
-		final WhileConditionArgument whileConditionArgument = new WhileConditionArgument(condition);	}
-	block(whileConditionArgument.getBlock())
+		final WhileConditionWord whileConditionWord = new WhileConditionWord(condition);	}
+	block(whileConditionWord.getBlock())
 	{
-		return whileConditionArgument;
+		return whileConditionWord;
 	}
 }

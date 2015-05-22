@@ -7,6 +7,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Simple class which presents a List<T> as an InputStream.
+ * 
+ * @author Dick
+ *
+ * @param <T>
+ */
 public class ListInputStream<T> extends InputStream {
 
 	/*

@@ -5,36 +5,40 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.iungo.logger.api.ClassLogger;
 import org.iungo.result.api.Result;
 
 public class Units implements Iterable<Entry<String, Unit>> {
-
-	private static final ClassLogger logger = new ClassLogger(Units.class.getName());
 	
 	public static final String ROOT_NS = Units.class.getName();
 	
-	private final ConcurrentMap<String, Unit> units = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Unit> units;
+	
+	public Units() {
+		super();
+		units = new ConcurrentHashMap<>();
+	}
 
 	public Unit get(final String name) {
 		return units.get(name);
 	}
 	
 	public Result add(final Unit unit) {
-		logger.begin(String.format("add(%s)", unit.getName()));
 		try {
-			return Result.valueOf(units.putIfAbsent(unit.getName(), unit) == null);
-		} finally {
-			logger.end(String.format("add(%s)", unit.getName()));
+			if (units.putIfAbsent(unit.getName(), unit) == null) {
+				return new Result(true, String.format("Added unit [%s].", unit.getName()), null);
+			} else {
+				return new Result(false, String.format("Failed to add unit [%s] as it already exists.", unit.getName()), null);
+			}
+		} catch (final Exception exception) {
+			return Result.valueOf(exception);
 		}
 	}
 
 	public Result remove(final String name) {
-		logger.begin(String.format("remove(%s)", name));
 		try {
 			return Result.valueOf(units.remove(name) != null);
-		} finally {
-			logger.end(String.format("remove(%s)", name));
+		} catch (final Exception exception) {
+			return Result.valueOf(exception);
 		}
 	}
 
